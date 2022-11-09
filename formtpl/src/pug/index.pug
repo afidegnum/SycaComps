@@ -1,0 +1,62 @@
+doctype html
+html(lang='en')
+
+    head
+
+        meta(charset='utf-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+        meta(name='description', content='')
+        meta(name='author', content='')
+
+        title Sycamore Data Form
+
+        // Favicon
+        link(rel='icon', type='image/x-icon', href='assets/favicon.ico')
+
+        // Bootstrap icons
+        link(href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css', rel='stylesheet')
+
+        // Core theme CSS (includes Bootstrap)
+        link(href='css/styles.css', rel='stylesheet')
+    body
+        // Navigation
+        nav.navbar.navbar-expand-lg.navbar-light.bg-light
+            .container.px-4.px-lg-5
+                a.navbar-brand(href='#!') Sycamore Data Form
+                button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent' aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation')
+                    span.navbar-toggler-icon
+                #navbarSupportedContent.collapse.navbar-collapse
+                    ul.navbar-nav.me-auto.mb-2.mb-lg-0.ms-lg-4
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Home
+        // Product section
+        section.py-5
+            .container.px-4.px-lg-5.my-5
+                .row.gx-4.gx-lg-5.align-items-center
+                    .col-md-6
+                        .list-group
+                          button.list-group-item.list-group-item-action.active(type='button', aria-current='true')
+                            | The current button
+                          button.list-group-item.list-group-item-action(type='button') A second item
+                    .col-md-6
+                        .small.mb-1 SKU: BST-498
+                        h1.display-5.fw-bolder Shop item template
+                        .fs-5.mb-5
+                            span.text-decoration-line-through $45.00
+                            span $40.00
+                        p.lead Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?
+                        .d-flex
+                            input#inputQuantity.form-control.text-center.me-3(type='num', value='1', style='max-width: 3rem')
+                            button.btn.btn-outline-dark.flex-shrink-0(type='button')
+                                i.bi-cart-fill.me-1
+                                | Add to cart
+        // Related items section                          
+        // Footer
+        footer.py-5.bg-dark
+            .container
+                p.m-0.text-center.text-white SycaForm
+        // Bootstrap core JS
+        script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js')
+
+        // Core theme JS
+        script(src='js/scripts.js')
