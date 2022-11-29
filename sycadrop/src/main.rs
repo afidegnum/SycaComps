@@ -18,7 +18,30 @@ fn main() {
 fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
     view! { cx,
         div(class="container") {
-             ItemWidget{}
+             DropZone{}
+
+        }
+    }
+}
+
+#[component]
+fn DraggableItem<G: Html>(cx: Scope) -> View<G> {
+    let node_ref = create_node_ref(cx);
+
+    let handle_dragstart = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        // dom.add_class("hide");
+        dom.set_attribute("style", "opacity: 0.2");
+    };
+
+    let handle_dragend = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.set_attribute("style", "opacity: 1");
+    };
+
+    view! { cx,
+        div(ref=node_ref, draggable=true, class="item", on:dragstart=handle_dragstart, on:dragend=handle_dragend) {
+             //ItemWidget{}
 
         }
     }
@@ -27,10 +50,42 @@ fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
 // basic test
 
 #[component]
+fn DropZone<G: Html>(cx: Scope) -> View<G> {
+    let node_ref = create_node_ref(cx);
+
+    let handle_dragstart = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.add_class("hide");
+    };
+
+    let handle_dragend = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.set_attribute("style", "opacity: 0.2");
+    };
+
+    view! { cx,
+        div(ref=node_ref, class="box") {
+             DraggableItem{}
+
+        }
+    }
+}
+
+#[component]
 fn ItemWidget<G: Html>(cx: Scope) -> View<G> {
     let x = create_signal(cx, 0);
     let y = create_signal(cx, 0);
     let node_ref = create_node_ref(cx);
+
+    let handle_dragstart = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.set_attribute("style", "opacity: 0.4");
+    };
+
+    let handle_dragend = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.set_attribute("style", "opacity: 1");
+    };
 
     let mousemove_handler = |e: Event| {
         log!("mouse_move");
@@ -86,10 +141,10 @@ fn ItemWidget<G: Html>(cx: Scope) -> View<G> {
     };
 
     view! {cx,
-        div(ref=node_ref, id="dragMe", class="box",
-            on:mousedown=mousedown_handler,
+        div(ref=node_ref, draggable=true, id="dragMe", class="box",
+            on:mousedown=mousedown_handler, on:dragstart=handle_dragstart,
         ){
-            "Drag me"
+            "Drag   me"
         }
     }
 }
