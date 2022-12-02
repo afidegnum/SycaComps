@@ -3,15 +3,23 @@
 use gloo::{console::log, utils::document};
 use sycamore::prelude::*;
 use wasm_bindgen::*;
-use web_sys::{Event, HtmlElement, MouseEvent};
+use web_sys::{DataTransfer, DragEvent, Element, Event, HtmlElement, MouseEvent};
 
 fn main() {
+    console_error_panic_hook::set_once();
+    console_log::init_with_level(log::Level::Debug).unwrap();
     sycamore::render(|cx| {
         view! { cx,
             p { "Hello, World!" }
                 ContainerWidget()
         }
     });
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Cat {
+    id: &'static str,
+    name: &'static str,
 }
 
 #[component]
@@ -24,25 +32,105 @@ fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
     }
 }
 
-#[component]
-fn DraggableItem<G: Html>(cx: Scope) -> View<G> {
+// #[component]
+#[component(inline_props)]
+fn DraggableItem<G: Html>(cx: Scope, b: String) -> View<G> {
     let node_ref = create_node_ref(cx);
-
+    let bb = create_signal(cx, b);
     let handle_dragstart = |e: Event| {
         let dom = node_ref.get::<DomNode>();
         // dom.add_class("hide");
+        let target = e.target().unwrap();
+        // log!(format!("{:?}", &target));
+        let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
+        let drag_event = drag_event_ref.clone();
+        let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
+        // log!(format!("{:?}", &dom.inner_element()));
+        if e.type_().contains("dragstart") {
+            data_transf.set_effect_allowed("move");
+            data_transf
+                .set_data(
+                    "text/html",
+                    &dom.inner_element().unchecked_into::<Element>().inner_html(),
+                )
+                .unwrap();
+            //let dt = data_transf.set_data("text/html", dom.inner_element().to_string());
+            //log!(format!("{:?}", &dom.inner_element().as_string().unwrap()));
+        }
+
         dom.set_attribute("style", "opacity: 0.2");
+
+        log!(format!("{:?}", e.type_()));
     };
 
     let handle_dragend = |e: Event| {
         let dom = node_ref.get::<DomNode>();
         dom.set_attribute("style", "opacity: 1");
+        log!(format!("{:?}", e.type_()));
+    };
+    let handle_dragenter = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.add_class("drag-over");
+        log!(format!("{:?}", e.type_()));
+
+        // dom.add_class("drag-over");
+        //dom.set_attribute("style", "opacity: 0.2");
+    };
+
+    let handle_dragover = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        e.prevent_default();
+        dom.add_class("drag-over");
+        //dom.set_attribute("style", "opacity: 0.2");
+        log!(format!("{:?}", e.type_()));
+    };
+
+    let handle_dragleave = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.remove_class("drag-over");
+        log!(format!("{:?}", e.type_()));
+
+        //dom.set_attribute("style", "opacity: 0.2");
+    };
+
+    let handle_drop = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+
+        // data_transfer_ref.get_data(format);
+        //
+
+        let data_transfer_ref: &web_sys::DataTransfer = e.unchecked_ref();
+
+        // dom.dangerously_set_inner_html(data_transfer_ref.get_data("text/html").unwrap().as_str());
+        // let drop_event = data_transfer_ref.clone();
+        let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
+        let drag_event = drag_event_ref.clone();
+        let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
+
+        dom.dangerously_set_inner_html(data_transf.get_data("text/html").unwrap().as_str());
+        // log!(format!("{:?}", &dom.inner_element()));
+
+        // let drag_event = drag_event_ref.clone();
+        // let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
+
+        // e.stop_propagation();
+        // log!(format!("{:?}", e.type_()));
+        // if e.type_().contains("dragend") {
+        //     let data_transfer_ref: &web_sys::DataTransfer = e.unchecked_ref();
+
+        //     dom.dangerously_set_inner_html(
+        //         data_transfer_ref.get_data("text/html").unwrap().as_str(),
+        //     );
+        // }
+
+        // dom.add_class("hide");
+        // dom.set_attribute("style", "opacity: 0.2");
     };
 
     view! { cx,
-        div(ref=node_ref, draggable=true, class="item", on:dragstart=handle_dragstart, on:dragend=handle_dragend) {
+        div(ref=node_ref, draggable=true, class="item", on:dragstart=handle_dragstart, on:dragend=handle_dragend, on:dragenter=handle_dragenter, on:dragover=handle_dragover, on:dragleave=handle_dragleave, on:drop=handle_drop) {
              //ItemWidget{}
-
+            (bb.get())
         }
     }
 }
@@ -52,21 +140,19 @@ fn DraggableItem<G: Html>(cx: Scope) -> View<G> {
 #[component]
 fn DropZone<G: Html>(cx: Scope) -> View<G> {
     let node_ref = create_node_ref(cx);
-
-    let handle_dragstart = |e: Event| {
-        let dom = node_ref.get::<DomNode>();
-        dom.add_class("hide");
-    };
-
-    let handle_dragend = |e: Event| {
-        let dom = node_ref.get::<DomNode>();
-        dom.set_attribute("style", "opacity: 0.2");
-    };
-
+    let count = create_signal(cx, vec![1, 2, 3, 4, 5]);
     view! { cx,
         div(ref=node_ref, class="box") {
-             DraggableItem{}
-
+             // DraggableItem{}
+            Keyed(
+                iterable=count,
+                    view=|cx, x|
+                        view! { cx,
+                                // li { (x) }
+                                DraggableItem(b=x.to_string())
+                },
+                key=|x| *x,
+            )
         }
     }
 }
