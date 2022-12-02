@@ -1,6 +1,7 @@
 // https://htmldom.dev/make-a-draggable-element/
 
 use gloo::{console::log, utils::document};
+use sycamore::generic_node::SycamoreElement;
 use sycamore::prelude::*;
 use wasm_bindgen::*;
 use web_sys::{DataTransfer, DragEvent, Element, Event, HtmlElement, MouseEvent};
@@ -41,7 +42,7 @@ fn DraggableItem<G: Html>(cx: Scope, b: String) -> View<G> {
         let dom = node_ref.get::<DomNode>();
         // dom.add_class("hide");
         let target = e.target().unwrap();
-        // log!(format!("{:?}", &target));
+        log!(format!("Target --- {:?}", &target));
         let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
         let drag_event = drag_event_ref.clone();
         let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
@@ -57,7 +58,6 @@ fn DraggableItem<G: Html>(cx: Scope, b: String) -> View<G> {
             //let dt = data_transf.set_data("text/html", dom.inner_element().to_string());
             //log!(format!("{:?}", &dom.inner_element().as_string().unwrap()));
         }
-
         dom.set_attribute("style", "opacity: 0.2");
 
         log!(format!("{:?}", e.type_()));
@@ -106,9 +106,24 @@ fn DraggableItem<G: Html>(cx: Scope, b: String) -> View<G> {
         let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
         let drag_event = drag_event_ref.clone();
         let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
-
+        let data = data_transf.get_data("text/html").unwrap();
+        log!(format!("{:?}", data.clone()));
+        // dom.append_child(&G::te)
+        log!(format!("{:?}", dom));
+        let nd = &dom.inner_element().unchecked_into::<Element>();
+        let elem = dom.inner_element();
+        log!(format!("... {:?}", elem.));
+        // dom.append_child(child)
         dom.dangerously_set_inner_html(data_transf.get_data("text/html").unwrap().as_str());
-        // log!(format!("{:?}", &dom.inner_element()));
+        let node = dom
+            .inner_element()
+            .unchecked_into::<Element>()
+            .set_inner_html(&data);
+
+        dom.append_child(node);
+        // let node =
+        //     dom.dangerously_set_inner_html(data_transf.get_data("text/html").unwrap().as_str());
+        // log!(format!("{:?}", &node));
 
         // let drag_event = drag_event_ref.clone();
         // let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
