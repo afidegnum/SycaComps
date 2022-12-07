@@ -71,6 +71,29 @@ impl ItemSwitch {
 
 #[component]
 fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
+    let new_items = create_rc_signal(ItemSwitch {
+        contents: create_rc_signal(vec![
+            ContentItem {
+                id: 0,
+                name: "Test item 0".to_string(),
+            },
+            ContentItem {
+                id: 0,
+                name: "Test item 1".to_string(),
+            },
+            ContentItem {
+                id: 1,
+                name: "Test item 2".to_string(),
+            },
+            ContentItem {
+                id: 2,
+                name: "Test item 3".to_string(),
+            },
+        ]),
+    });
+
+    provide_context(cx, new_items);
+
     view! { cx,
         div(class="container") {
              DropZone{}
@@ -86,7 +109,8 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
     let a_index = create_signal(cx, a);
     let c_item = create_signal(cx, c);
 
-    let mut switch_item = use_context::<ItemSwitch>(cx);
+    // let switch_item = use_context::<ItemSwitch>(cx);
+    // let switch_item = use_context::<RcSignal<ItemSwitch>>(cx);
 
     let handle_dragstart = |e: Event| {
         let dom = node_ref.get::<DomNode>();
@@ -138,7 +162,7 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
         // log!(format!("{:?}", e.type_()));
     };
 
-    let mut handle_drop = |e: Event| {
+    let handle_drop = move |e: Event| {
         let dom = node_ref.get::<DomNode>();
 
         // let data_transfer_ref: &web_sys::DataTransfer = e.unchecked_ref();
@@ -149,7 +173,14 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
         let data = data_transf.get_data("text/html").unwrap();
         log!(format!("{:?}", data.clone()));
         log!(format!("{:?}", &a_index.get()));
-        switch_item.switch(data.clone().parse::<usize>().unwrap(), *a_index.get());
+        let switch_item = use_context::<RcSignal<ItemSwitch>>(cx);
+        let sv = &*switch_item.get();
+        sv.clone()
+            .switch(data.parse::<usize>().unwrap(), *a_index.get());
+        //log!(format!("Values{:?}", sv.clone().values()));
+        // switch_item
+        //     .clone()
+        //     .switch(data.clone().parse::<usize>().unwrap(), *a_index.get());
         // // dom.append_child(&G::te)
         // // log!(format!("{:?}", dom));
         // let nd = &dom.inner_element().unchecked_into::<Element>();
@@ -313,29 +344,30 @@ fn DropZone<G: Html>(cx: Scope) -> View<G> {
     //     contents: items.clone(),
     // };
 
-    let new_items = create_rc_signal(ItemSwitch {
-        contents: create_rc_signal(vec![
-            ContentItem {
-                id: 0,
-                name: "Test item 0".to_string(),
-            },
-            ContentItem {
-                id: 0,
-                name: "Test item 1".to_string(),
-            },
-            ContentItem {
-                id: 1,
-                name: "Test item 2".to_string(),
-            },
-            ContentItem {
-                id: 2,
-                name: "Test item 3".to_string(),
-            },
-        ]),
-    });
+    // let new_items = create_rc_signal(ItemSwitch {
+    //     contents: create_rc_signal(vec![
+    //         ContentItem {
+    //             id: 0,
+    //             name: "Test item 0".to_string(),
+    //         },
+    //         ContentItem {
+    //             id: 0,
+    //             name: "Test item 1".to_string(),
+    //         },
+    //         ContentItem {
+    //             id: 1,
+    //             name: "Test item 2".to_string(),
+    //         },
+    //         ContentItem {
+    //             id: 2,
+    //             name: "Test item 3".to_string(),
+    //         },
+    //     ]),
+    // });
 
-    let item_contents = provide_context(cx, new_items);
-
+    // let item_contents = provide_context(cx, new_items);
+    // let item_contents = use_context::<ItemSwitch>(cx);
+    let item_contents = use_context::<RcSignal<ItemSwitch>>(cx);
     // let it = *item_contents.get();
     let values = create_memo(cx, move || {
         /*
@@ -361,6 +393,8 @@ fn DropZone<G: Html>(cx: Scope) -> View<G> {
             .collect::<Vec<(usize, ContentItem)>>();
         x
         */
+        // let it_sw = &*item_contents.clone().get().contents.get();
+        // let it_sw = &*item_contents.clone().contents.get();
         let it_sw = &*item_contents.clone().get().contents.get();
         let is = it_sw
             .into_iter()
@@ -369,6 +403,8 @@ fn DropZone<G: Html>(cx: Scope) -> View<G> {
             .collect::<Vec<(usize, ContentItem)>>();
         is
     });
+
+    // log!(format!("{:?}", values));
 
     view! { cx,
         div(ref=node_ref, class="box") {
