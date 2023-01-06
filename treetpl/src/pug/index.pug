@@ -31,130 +31,45 @@ html(lang='en')
                     ul.navbar-nav.me-auto.mb-2.mb-lg-0.ms-lg-4
                         li.nav-item
                             a.nav-link.active(aria-current='page' href='#!') Home
-                        li.nav-item
-                            a.nav-link(href='#!') About
-                        li.nav-item.dropdown
-                            a#navbarDropdown.nav-link.dropdown-toggle(href='#' role='button' data-bs-toggle='dropdown' aria-expanded='false')
-                                | Shop
-                            ul.dropdown-menu(aria-labelledby='navbarDropdown')
-                                li
-                                    a.dropdown-item(href='#!') All Products
-                                li
-                                    hr.dropdown-divider
-                                li
-                                    a.dropdown-item(href='#!') Popular Items
-                                li
-                                    a.dropdown-item(href='#!') New Arrivals
-                    form.d-flex
-                        button.btn.btn-outline-dark(type='submit')
-                            i.bi-cart-fill.me-1
-                            | Cart
-                            span.badge.bg-dark.text-white.ms-1.rounded-pill 0
 
         // Product section
         section.py-5
             .container.px-4.px-lg-5.my-5
                 .row.gx-4.gx-lg-5.align-items-center
                     .col-md-6
-                        img.card-img-top.mb-5.mb-md-0(src='https://dummyimage.com/600x700/dee2e6/6c757d.jpg', alt='...')
-                    .col-md-6
-                        .small.mb-1 SKU: BST-498
-                        h1.display-5.fw-bolder Shop item template
-                        .fs-5.mb-5
-                            span.text-decoration-line-through $45.00
-                            span $40.00
-                        p.lead Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?
-                        .d-flex
-                            input#inputQuantity.form-control.text-center.me-3(type='num', value='1', style='max-width: 3rem')
-                            button.btn.btn-outline-dark.flex-shrink-0(type='button')
-                                i.bi-cart-fill.me-1
-                                | Add to cart
+                        ul.list-group.w-50
+                          li.list-group-item.border-0
+                            i.bi.bi-plus-square.me-1
+                            | Tree Group 1
+                          li.list-group-item.border-0
+                            i.fas.fa-bomb.fa-fw.me-4
+                            | Leaf Item
+                        ul.list-group.border-0
+                          li.list-group-item.ba.bi-plus-square.border-0
+                              i.fas.fa-code.fa-fw.me-4
+                              | Nested Tree One
+                          ul.list-group
+                              li.list-group-item.border-0
+                                i.far.fa-gem.fa-fw.me-4
+                                | Leaf One
+                              li.list-group-item.border-0
+                                i.fas.fa-cogs.fa-fw.me-4
+                                | Leaf two
+                              ul.list-group.border-0
+                               li.list-group-item.ba.bi-plus-square.border-0
+                                   i.fas.fa-code.fa-fw.me-4
+                                   | Nested Tree Two
+                               ul.list-group
+                                   li.list-group-item.border-0
+                                     i.far.fa-gem.fa-fw.me-4
+                                     | Leaf One
+                                   li.list-group-item.border-0
+                                     i.fas.fa-cogs.fa-fw.me-4
+                                     | Leaf two
 
-        // Related items section
-        section.py-5.bg-light
-            .container.px-4.px-lg-5.mt-5
-                h2.fw-bolder.mb-4 Related products
-                .row.gx-4.gx-lg-5.row-cols-2.row-cols-md-3.row-cols-xl-4.justify-content-center
-                    .col.mb-5
-                        .card.h-100
-                            // Product image
-                            img.card-img-top(src='https://dummyimage.com/450x300/dee2e6/6c757d.jpg', alt='...')
-                            // Product details
-                            .card-body.p-4
-                                .text-center
-                                    // Product name
-                                    h5.fw-bolder Fancy Product
-                                    // Product price
-                                    | $40.00 - $80.00
-                            // Product actions
-                            .card-footer.p-4.pt-0.border-top-0.bg-transparent
-                                .text-center
-                                    a.btn.btn-outline-dark.mt-auto(href='#') View options
-                    .col.mb-5
-                        .card.h-100
-                            // Sale badge
-                            .badge.bg-dark.text-white.position-absolute(style='top: 0.5rem; right: 0.5rem;') Sale
-                            // Product image
-                            img.card-img-top(src='https://dummyimage.com/450x300/dee2e6/6c757d.jpg', alt='...')
-                            // Product details
-                            .card-body.p-4
-                                .text-center
-                                    // Product name
-                                    h5.fw-bolder Special Item
-                                    // Product reviews
-                                    .d-flex.justify-content-center.small.text-warning.mb-2
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                    // Product price
-                                    span.text-muted.text-decoration-line-through $20.00
-                                    | $18.00
-                            // Product actions
-                            .card-footer.p-4.pt-0.border-top-0.bg-transparent
-                                .text-center
-                                    a.btn.btn-outline-dark.mt-auto(href='#') Add to cart
-                    .col.mb-5
-                        .card.h-100
-                            // Sale badge
-                            .badge.bg-dark.text-white.position-absolute(style='top: 0.5rem; right: 0.5rem;') Sale
-                            // Product image
-                            img.card-img-top(src='https://dummyimage.com/450x300/dee2e6/6c757d.jpg', alt='...')
-                            // Product details
-                            .card-body.p-4
-                                .text-center
-                                    // Product name
-                                    h5.fw-bolder Sale Item
-                                    // Product price
-                                    span.text-muted.text-decoration-line-through $50.00
-                                    | $25.00
-                            // Product actions
-                            .card-footer.p-4.pt-0.border-top-0.bg-transparent
-                                .text-center
-                                    a.btn.btn-outline-dark.mt-auto(href='#') Add to cart
-                    .col.mb-5
-                        .card.h-100
-                            // Product image
-                            img.card-img-top(src='https://dummyimage.com/450x300/dee2e6/6c757d.jpg', alt='...')
-                            // Product details
-                            .card-body.p-4
-                                .text-center
-                                    // Product name
-                                    h5.fw-bolder Popular Item
-                                    // Product reviews
-                                    .d-flex.justify-content-center.small.text-warning.mb-2
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                        .bi-star-fill
-                                    // Product price
-                                    | $40.00
-                            // Product actions
-                            .card-footer.p-4.pt-0.border-top-0.bg-transparent
-                                .text-center
-                                    a.btn.btn-outline-dark.mt-auto(href='#') Add to cart
+                    .col-md-6
+                        h1.display-5.fw-bolder Sycamore Tree View
+                        p.lead Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?
 
 
         // Footer

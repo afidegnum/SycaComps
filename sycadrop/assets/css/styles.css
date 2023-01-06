@@ -35,8 +35,8 @@ h1 {
 }
 
 .box {
-    height: 150px;
-    width: 150px;
+    height: 350px;
+    width: 350px;
     border: solid 3px #ccc;
     margin: 10px;
 
@@ -54,9 +54,12 @@ h1 {
 }
 
 .item {
-    height: 75px;
-    width: 75px;
+    height: 100px;
+    width: 100px;
     background-color: #F0DB4F;
+    /* border: solid 3px #000; */
+    margin: 5px;
+
 
 }
 

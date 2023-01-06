@@ -29,34 +29,190 @@ html(lang='en')
                     ul.navbar-nav.me-auto.mb-2.mb-lg-0.ms-lg-4
                         li.nav-item
                             a.nav-link.active(aria-current='page' href='#!') Home
-        // Product section
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Nested
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Arrays
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Numbers
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Dynamic
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Sorting
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Date-Time
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Dependent
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') Additional Properties
+                        li.nav-item
+                            a.nav-link.active(aria-current='page' href='#!') File
+                            // Product section
         section.py-5
             .container.px-4.px-lg-5.my-5
-                .row.gx-4.gx-lg-5.align-items-center
-                    .col-md-6
-                        .list-group
-                          button.list-group-item.list-group-item-action.active(type='button', aria-current='true')
-                            | The current button
-                          button.list-group-item.list-group-item-action(type='button') A second item
-                    .col-md-6
-                        .small.mb-1 SKU: BST-498
-                        h1.display-5.fw-bolder Shop item template
-                        .fs-5.mb-5
-                            span.text-decoration-line-through $45.00
-                            span $40.00
-                        p.lead Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?
-                        .d-flex
-                            input#inputQuantity.form-control.text-center.me-3(type='num', value='1', style='max-width: 3rem')
-                            button.btn.btn-outline-dark.flex-shrink-0(type='button')
-                                i.bi-cart-fill.me-1
-                                | Add to cart
+                h1.display-3.text-center.py-5 Basic Form
+                .row.gx-2.gx-lg-2.align-items-center
+                    .col-md-9
+                        .card-group
+                            .card
+                                .card-body
+                                    fieldset
+                                       legend Fill the Form
+                                       .mb-3
+                                         label.form-label(for='fname') First Name
+                                         input#fname.form-control(type='text', aria-describedby='emailHelp')
+                                         #emailHelp.form-text We&apos;ll never share your email with anyone else.
+                                       .mb-3
+                                         label.form-label(for='lname') Last Name
+                                         input#lname.form-control(type='text')
+                                       .mb-3
+                                         label.form-label(for='tel') Telephone
+                                         input#tel.form-control(type='text')
+                                       .mb-3
+                                         label.form-label(for='tel') Email
+                                         input#tel.form-control(type='email')
+                                       fieldset
+                                         legend Password
+                                         .mb-3
+                                           input.form-control(type='password', placeholder='Password')
+                                         .mb-3
+                                           input.form-control(type='password', placeholder='Repeat password')
+
+                                         .mb-3.form-check.form-check-inline
+                                           input#inlineCheckbox1.form-check-input(type='checkbox', value='readonly')
+                                           label.form-check-label(for='inlineCheckbox1') Read Only
+                                         .mb-3.form-check.form-check-inline
+                                           input#inlineCheckbox2.form-check-input(type='checkbox', value='disable')
+                                           label.form-check-label(for='inlineCheckbox2') Disable
+
+                                    button.btn.btn-primary(type='submit') Submit
+                            .card.border-light
+                                .card-header.text-center Options
+                                .card-body.px-5
+                                  .form-check
+                                    input#gridRadios1.form-check-input(type='radio', name='gridRadios', value='sanitize', checked='')
+                                    label.form-check-label(for='gridRadios1')
+                                      | Sanitize String
+                                  .form-check
+                                    input#gridRadios2.form-check-input(type='radio', name='gridRadios', value='alpha_only')
+                                    label.form-check-label(for='gridRadios2')
+                                      | Alphabets Only
+                                  .form-check
+                                   input#gridRadios2.form-check-input(type='radio', name='gridRadios', value='maximum_string')
+                                   label.form-check-label(for='gridRadios2')
+                                     | Maximum Number of String
+                                  .form-check.form-switch
+                                    input#flexSwitchCheckDefault.form-check-input(type='checkbox', role='switch')
+                                    label.form-check-label(for='flexSwitchCheckDefault') Disable Form
+                    .col-md-3
+                        .card.border-info
+                            .card-header Output
+                            .card-body
+                              h5.card-title Info card title
+                              p.card-text
+                                | Some quick example text to build on the card title and make up the bulk of the card&apos;s content.
+
+
+        section.py-5
+           .container.px-4.px-lg-5.my-5
+               h1.display-3.text-center.py-5 Nested Form
+               .row.gx-2.gx-lg-2.align-items-center
+                   .col-md-9
+                       .card-group
+                           .card
+                               .card-body
+                                   fieldset
+                                      legend Fill the Form
+                                      .mb-3
+                                        label.form-label(for='fname') First Name
+                                        input#fname.form-control(type='text', aria-describedby='emailHelp')
+                                        #emailHelp.form-text We&apos;ll never share your email with anyone else.
+                                      .mb-3
+                                        label.form-label(for='lname') List Group
+                                        input#lname.form-control(type='text')
+
+                               button.btn.btn-primary(type='submit') Submit
+                   .col-md-3
+                     .card.border-info
+                       .card-header Output
+                       .card-body
+                         h5.card-title Info card title
+                         p.card-text
+                           | Some quick example text to build on the card title and make up the bulk of the card&apos;s content.
+
+        section.py-5
+           .container.px-4.px-lg-5.my-5
+               h1.display-3.text-center.py-5 Array Form
+               .row.gx-2.gx-lg-2.align-items-center
+                   .col-md-9
+                       .card-group
+                           .card
+                               .card-body
+                                   fieldset
+                                      legend Array
+                                      .mb-3
+                                        label.form-label(for='fname') First Name
+                                        input#fname.form-control(type='text', aria-describedby='emailHelp')
+                                        #emailHelp.form-text We&apos;ll never share your email with anyone else.
+                                      .mb-3
+                                        label.form-label(for='lname') List Group
+                                        input#lname.form-control(type='text')
+
+                               button.btn.btn-primary(type='submit') Submit
+                   .col-md-3
+                     .card.border-info
+                       .card-header Output
+                       .card-body
+                         h5.card-title Info card title
+                         p.card-text
+                           | Some quick example text to build on the card title and make up the bulk of the card&apos;s content.
+
+        section.py-5
+           .container.px-4.px-lg-5.my-5
+               h1.display-3.text-center.py-5 Numbers Form
+               .row.gx-2.gx-lg-2.align-items-center
+                   .col-md-9
+                       .card-group
+                           .card
+                               .card-body
+                                   fieldset
+                                      legend Numbers
+                                      .mb-3
+                                        label.form-label(for='fname') Integer
+                                        input#fname.form-control(type='number', aria-describedby='emailHelp')
+
+                                      .mb-3
+                                        label.form-label(for='fname') Float
+                                        input#fname.form-control(type='number', step=0.01, aria-describedby='emailHelp')
+                                      .mb-3
+                                        label.form-label(for='customRange1') Number range
+                                        input#customRange1.form-range(type='range')
+                                      .mb-3
+                                        label.form-label(for='customRange3') Number range with steps
+                                        input#customRange3.form-range(type='range', min='0', max='10', step='2')
+                                      .mb-3
+                                        label.form-label(for='lname') List Group
+                                        input#lname.form-control(type='text')
+
+                               button.btn.btn-primary(type='submit') Submit
+                   .col-md-3
+                     .card.border-info
+                       .card-header Output
+                       .card-body
+                         h5.card-title Info card title
+                         p.card-text
+                           | Some quick example text to build on the card title and make up the bulk of the card&apos;s content.
+
+
+
+
         // Related items section                          
         // Footer
         footer.py-5.bg-dark
             .container
                 p.m-0.text-center.text-white SycaForm
-        // Bootstrap core JS
-        script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js')
+        //- // Bootstrap core JS
+        //- script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js')
 
-        // Core theme JS
-        script(src='js/scripts.js')
+        //- // Core theme JS
+        //- script(src='js/scripts.js')
