@@ -32,51 +32,92 @@ struct ContentItem {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Contents {
-    contents: Vec<ContentItem>,
+    items: Vec<ContentItem>,
+}
+impl Contents {
+    pub fn swap_elements(
+        &mut self,
+        index1: usize,
+        index2: usize,
+    ) -> Option<Vec<(usize, &ContentItem)>> {
+        if let (Some(item1), Some(item2)) = (self.items.get(index1), self.items.get(index2)) {
+            self.items.swap(index1, index2);
+            let updated_list = self
+                .items
+                .iter()
+                .enumerate()
+                .map(|(index, item)| (index, item))
+                .collect();
+            return Some(updated_list);
+        }
+        None
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct ItemSwitch {
-    contents: RcSignal<Vec<ContentItem>>, //  Vec<ContentItem>,
+    // contents: RcSignal<Vec<ContentItem>>,
+    contents: RcSignal<Contents>,
 }
 
-impl ItemSwitch {
-    fn switch(self, first: usize, last: usize) -> ItemSwitch {
-        self.contents.modify().swap(first, last);
-        // self.item.swap(first, last);
-        self
-    }
-    fn values(self) -> Vec<(usize, ContentItem)> {
-        let cont = &*self.clone().contents.get();
-        cont.into_iter()
-            .cloned()
-            .enumerate()
-            .collect::<Vec<(usize, ContentItem)>>()
-    }
-}
+// impl ItemSwitch {
+//     fn switch(self, first: usize, last: usize) -> ItemSwitch {
+//         self.contents.modify().swap(first, last);
+//         self.contents.track();
+//         // self.item.swap(first, last);
+//         self
+//     }
+// }
 
 #[component]
 fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
+    /*
     let new_items = create_rc_signal(ItemSwitch {
-        contents: create_rc_signal(vec![
+            contents: create_rc_signal(
+                vec![
+                ContentItem {
+                    id: 0,
+                    name: "Test item 0".to_string(),
+                },
+                ContentItem {
+                    id: 1,
+                    name: "Test item 1".to_string(),
+                },
+                ContentItem {
+                    id: 2,
+                    name: "Test item 2".to_string(),
+                },
+                ContentItem {
+                    id: 3,
+                    name: "Test item 3".to_string(),
+                },
+            ]
+    ),
+        });
+
+        */
+    let rc_items = create_rc_signal(Contents {
+        items: vec![
             ContentItem {
                 id: 0,
                 name: "Test item 0".to_string(),
             },
             ContentItem {
-                id: 0,
+                id: 1,
                 name: "Test item 1".to_string(),
             },
             ContentItem {
-                id: 1,
+                id: 2,
                 name: "Test item 2".to_string(),
             },
             ContentItem {
-                id: 2,
+                id: 3,
                 name: "Test item 3".to_string(),
             },
-        ]),
+        ],
     });
+
+    let new_items = ItemSwitch { contents: rc_items };
 
     provide_context(cx, new_items);
 
@@ -141,9 +182,16 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
         log!(format!("{:?}", data.clone()));
         log!(format!("{:?}", &a_index.get()));
         let switch_item = use_context::<RcSignal<ItemSwitch>>(cx);
-        let sv = &*switch_item.get();
-        sv.clone()
-            .switch(data.parse::<usize>().unwrap(), *a_index.get());
+        let sv = switch_item.get().as_ref().clone();
+        let t = sv
+            .contents
+            .get()
+            .as_ref()
+            .clone()
+            .swap_elements(data.parse::<usize>().unwrap(), *a_index.get())
+            .unwrap();
+        // let sv = &*switch_item.get();
+        // sv.clone().switch(data.parse::<usize>().unwrap(), *a_index.get());
     };
 
     view! { cx,
@@ -158,7 +206,24 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
 fn DropZone<G: Html>(cx: Scope) -> View<G> {
     let node_ref = create_node_ref(cx);
     let item_contents = use_context::<RcSignal<ItemSwitch>>(cx);
+
     let values = create_memo(cx, move || {
+        let it_sw = item_contents
+            .get()
+            .as_ref()
+            .clone()
+            .contents
+            .get()
+            .as_ref()
+            .clone()
+            .items;
+        let is = it_sw
+            .into_iter()
+            .enumerate()
+            .collect::<Vec<(usize, ContentItem)>>();
+        is
+
+        /*
         let it_sw = &*item_contents.clone().get().contents.get();
         let is = it_sw
             .into_iter()
@@ -166,6 +231,7 @@ fn DropZone<G: Html>(cx: Scope) -> View<G> {
             .enumerate()
             .collect::<Vec<(usize, ContentItem)>>();
         is
+        */
     });
 
     view! { cx,

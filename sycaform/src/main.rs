@@ -1,13 +1,221 @@
-use components::basic::BasicForm;
+use std::collections::HashMap;
+
+use serde_json::Value;
 use sycamore::prelude::*;
-pub mod components;
+pub mod widgets;
+use serde::{Deserialize, Serialize};
+use serde_json;
+use serde_json::json;
+
+use widgets::formlayout::FormLayout;
+use widgets::formresult::FormResult;
+
+// macro_rules! node_ref {
+//     ($($id:expr)*) => {
+//         paste::paste! {
+//             $(
+//                 let [< $id >] = create_node_ref(cx);
+//             )*
+//         }
+//     }
+// }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Form {
+    pub title: String,
+    pub description: String,
+    required: Vec<String>, // point Vec to properties field.
+    properties: HashMap<String, Value>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FormExportData {
+    pub field_data: HashMap<String, Value>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FormData {
+    pub data: RcSignal<HashMap<String, Value>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct FormState {
+    pub formstate: RcSignal<Form>,
+}
 
 #[component]
 fn App<G: Html>(cx: Scope) -> View<G> {
-    // let state = create_signal(cx, 0i32);
-    // let increment = |_| state.set(*state.get() + 1);
-    // let decrement = |_| state.set(*state.get() - 1);
-    // let reset = |_| state.set(0);
+    let json_data = json!({
+      "title": "A registration form",
+      "description": "A simple form example.",
+      "type": "object",
+      "required": [
+        "firstName",
+        "lastName"
+      ],
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "title": "First name",
+          "default": "Chuck"
+        },
+        "lastName": {
+          "type": "string",
+          "title": "Last name"
+        },
+        "age": {
+          "type": "integer",
+          "title": "Ente a number"
+        },
+          "date": {
+          "type": "date",
+          "title": "Enter a Date"
+        },
+          "datetime": {
+          "type": "datetime",
+          "title": "Enter a Date and Time"
+        },
+          "file": {
+          "type": "file",
+          "title": "Upload a File",
+          "accept": "",
+          "multiple": false
+        },
+          "url": {
+          "type": "url",
+          "title": "Enter link"
+        },
+          "search": {
+          "type": "search",
+          "title": "Search"
+        },
+         "datalist": {
+          "type": "datalist",
+          "title": "Datalist: Search and/or select",
+            "enum": [
+            {
+              "name": "Option One",
+              "key": "o1",
+            },
+            {
+              "name": "Option Two",
+              "key": "o2",
+            },
+            {
+              "name": "Option Tree",
+              "key": "o3"
+            },
+            {
+              "name": "Option 4",
+              "key": "o4"
+            }
+            ]
+        },
+          "checkboxes": {
+          "type": "checkbox",
+          "title": "select as many as possible",
+           "enum": [
+            {
+              "name": "Item One",
+              "key": "io",
+              "checked": false
+            },
+            {
+              "name": "Item two",
+              "key": "it",
+              "checked": true
+
+            },
+            {
+              "name": "Item 3",
+              "key": "itx",
+              "checked": false
+
+            },
+            {
+              "name": "Item 4",
+              "key": "ity",
+              "checked": false
+
+            }
+            ]
+        },
+         "color": {
+          "type": "color",
+          "title": "Choose A Color"
+        },
+         "interval": {
+          "type": "range",
+          "title": "Interval",
+           "minimal": 0,
+           "maximal": 100,
+           "multipleOf": 2
+
+        },
+        "bio": {
+          "type": "textarea",
+          "title": "Bio",
+          "minLength": 5,
+          "maxLength": 10,
+        },
+        "password": {
+          "type": "password",
+          "title": "Password",
+          "minLength": 3
+        },
+        "telephone": {
+          "type": "string",
+          "title": "Telephone",
+          "minLength": 5
+        },
+         "countries": {
+         "type": "radio",
+            "title": "Number enum",
+            "enum": [
+            {
+              "name": "New York",
+              "key": "ny",
+            },
+            {
+              "name": "Amsterdam",
+              "key": "amst",
+            },
+            {
+              "name": "Hong Kong",
+              "key": "hongkong"
+            }
+
+            ]
+         },
+      }
+    }
+    );
+
+    let json_form: Form = serde_json::from_value(json_data).unwrap();
+    println!("JSON form: {:?}", json_form);
+
+    let required = &json_form.required;
+    let mut properties = json_form.properties.clone();
+    for (key, value) in properties.iter_mut() {
+        if required.contains(key) {
+            value["required"] = json!(true);
+        }
+    }
+
+    let mut json_form = json_form;
+    json_form.properties = properties;
+
+    let form_state = FormState {
+        formstate: create_rc_signal(json_form),
+    };
+
+    let form_data = FormData {
+        data: create_rc_signal(HashMap::new()),
+    };
+
+    let new_state = form_state.clone();
+
+    provide_context(cx, form_data);
     view! { cx,
             // Body Start
             nav (class="navbar navbar-expand-lg navbar-light bg-light") {div (class="container px-4 px-lg-5") {
@@ -33,12 +241,55 @@ fn App<G: Html>(cx: Scope) -> View<G> {
 
                 }
 
+
             }
-           BasicForm()
-                // Body End
+    //
+            section (class="py-5") {div (class="container px-4 px-lg-5 my-5") {
+            h1 (class="display-3 text-center py-5") {"Dynamic Forms"}
+
+            div (class="row gx-2 gx-lg-2 align-items-center") {
+                div (class="col-md-4") {
+                    div (class="card border-info") {
+                        div (class="card-header") {"Data"}
+
+                        div (class="card-body") {
+                            h5 (class="card-title") {"Initial Form Data"}
+
+                            pre (class="card-text")
+                    {(format!("{:#?}", new_state.formstate.get())) }
+
+                        }
+
+                    }
+
+                }
+
+                //Insert Form
+
+                FormLayout(form_state)
+
+                //End of Form
+
+
+                FormResult()
+
+            }
+
+        }
+
+    }
+
+
+                                                                         //
+
+
+
+            // Body End
         }
 }
 
 fn main() {
+    console_error_panic_hook::set_once();
+    console_log::init_with_level(log::Level::Debug).unwrap();
     sycamore::render(App);
 }

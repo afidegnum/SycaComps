@@ -2814,7 +2814,6 @@ textarea.form-control-lg {
 }
 
 .valid-feedback {
-  display: none;
   width: 100%;
   margin-top: 0.25rem;
   font-size: 0.875em;
@@ -2825,7 +2824,6 @@ textarea.form-control-lg {
   position: absolute;
   top: 100%;
   z-index: 5;
-  display: none;
   max-width: 100%;
   padding: 0.25rem 0.5rem;
   margin-top: 0.1rem;
@@ -2903,7 +2901,6 @@ textarea.form-control-lg {
 }
 
 .invalid-feedback {
-  display: none;
   width: 100%;
   margin-top: 0.25rem;
   font-size: 0.875em;
@@ -2914,7 +2911,6 @@ textarea.form-control-lg {
   position: absolute;
   top: 100%;
   z-index: 5;
-  display: none;
   max-width: 100%;
   padding: 0.25rem 0.5rem;
   margin-top: 0.1rem;
