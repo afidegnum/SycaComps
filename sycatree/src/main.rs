@@ -21,7 +21,7 @@ impl Node {
         }
     }
 
-    fn has_child(&self, nodes: &Vec<Node>) -> bool {
+    fn has_child(&self, nodes: &[Node]) -> bool {
         nodes.iter().any(|n| n.parent_id == Some(self.id))
     }
 
@@ -36,26 +36,6 @@ impl Node {
         }
         None
     }
-
-    pub fn display_immediate_child(&self, nodes: &[Node]) {
-        let immediate_child = nodes.iter().find(|n| n.parent_id == Some(self.id));
-        match immediate_child {
-            Some(child) => println!("{}", child.name),
-            None => println!("Node {} has no immediate child.", self.id),
-        }
-    }
-
-    pub fn display_children(&self, nodes: &[Node]) {
-        let children: Vec<&Node> = nodes.iter().filter(|n| n.parent_id == Some(self.id)).collect();
-        if children.is_empty() {
-            println!("Node {} has no children.", self.id);
-        } else {
-            for child in children {
-                println!("{}", child.name);
-            }
-        }
-    }
-
 }
 
 #[derive(Debug, Default, Clone)]
@@ -105,10 +85,12 @@ fn App<G: Html>(cx: Scope) -> View<G> {
     let node_context = provide_context(cx, node_state);
 
     let root_nodes = node_context.nodes.get().get_root_nodes();
-
+    // let roots: &[Node] = &root_nodes;
+    // let roots: Vec<Node> = root_nodes.to_owned();
+    // let y = &roots.clone();
     // let roots = vec_nodes.get_root_nodes();
     let rnodes = create_signal(cx, root_nodes.clone());
-    let roots = rnodes.get().as_ref().clone()
+
     view! { cx,
             div(class="py-4"){
                 div(class="container-sm"){
@@ -121,12 +103,14 @@ fn App<G: Html>(cx: Scope) -> View<G> {
                                     view= move |cx, x|
                                         {
                                             // let child_button = view! { cx, button{ i(class="fa-regular fa-square-plus")}};
-
+                                            // let rnod = rnodes.clone();
+                                            // let roots: &[Node] = rnod.get().as_ref().clone().as_slice();
                                             let x_child = x.clone();
+                                            let roots = rnodes.get().as_ref().clone();
+                                             let n_haschild = format!("--{:#?}", x_child.has_child(&roots));
+
                                             view! { cx,
-                                                    li(class="list-group-item") { (format!("{:#?}", x_child.has_child(&roots.clone()))) (x.name) }
-
-
+                                                    li(class="list-group-item") { (n_haschild) (x.name) hr() div{(format!("{:#?}", x_child))} }
 
                                     }},
                                     key=|x| x.id,
