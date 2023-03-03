@@ -36,6 +36,13 @@ impl Node {
         }
         None
     }
+
+    pub fn get_immediate_children<'a>(&'a self, nodes: &'a [Node]) -> Vec<&'a Node> {
+        nodes
+            .iter()
+            .filter(|n| n.parent_id == Some(self.id))
+            .collect()
+    }
 }
 
 #[derive(Debug, Default, Clone)]
@@ -61,6 +68,136 @@ impl NodeList {
 }
 
 #[component]
+fn NestedNode<G: Html>(cx: Scope, n: Node) -> View<G> {
+    let nm = n.clone();
+    let all_nodes = use_context::<NodeState>(cx);
+    let nodes = all_nodes.nodes.get().as_ref().clone().list;
+    // let ch = n.get_immediate_children(nodes.clone());
+    let ch = n
+        .get_immediate_children(&nodes)
+        .into_iter()
+        .cloned()
+        .collect();
+    let chd = create_signal(cx, ch);
+    // let arr = nx.get_immediate_children(&nodes);
+    let toggle_state = create_signal(cx, false);
+    let toggle = |_| {
+        if *toggle_state.get() {
+            toggle_state.set(false)
+        } else {
+            toggle_state.set(true)
+        }
+    };
+    let class = move || {
+        format!(
+            "fa-regular {}",
+            if *toggle_state.get() {
+                "fa-square-minus"
+            } else if n.has_child(&nodes) {
+                "fa-square-plus"
+            } else {
+                ""
+            }
+        )
+    };
+
+    view! {cx,  i(on:click=toggle, class=class()) (nm.name)
+     (if *toggle_state.get() {
+         // let ch = nx.get_immediate_children(&nodes);
+         // let childr = create_signal(cx, ch);
+         view! { cx,
+            ul(class="list-group") {
+                Keyed(
+                    iterable=chd,
+                    view=|cx, x| view! { cx,
+                        // li { (x.name) }
+                       li(class="list-group-item") {NestedNode(x)}
+                    },
+                    key=|x| x.id,
+                )
+            }
+        }
+
+    } else {
+        view! { cx, } // Now you don't
+    }
+     )
+        }
+}
+
+#[component]
+fn TreeNode<G: Html>(cx: Scope, n: Node) -> View<G> {
+    let all_nodes = use_context::<NodeState>(cx);
+    let nodes = all_nodes.nodes.get().as_ref().clone().list;
+    let x_child = n.clone();
+    // log!(format!("Node {:?}", &x_child.has_child(&root_nodes)));
+    // let roots = rnodes.get().as_ref().clone();
+    let n_haschild = x_child.has_child(&nodes);
+    // let toggle = create_signal(cx, false);
+    // if toggle=true, fa-square-minus;
+    //      iterate display immmediate children -> iterate node.display_immediate_children.
+    //          if node.has_child, fa-square-plus
+    /*
+     *
+    let toggle = |_| state.set(*state.get() - 1);
+    let x = 5;
+    let fact = || {
+    fn helper(arg: u64) -> u64 {
+        match arg {
+            0 => 1,
+            _ => arg * helper(arg - 1),
+        }
+    }
+    helper(x)
+    };
+    assert_eq!(120, fact());
+    */
+
+    // let toggle_view = move || {
+    //     view! { cx,  div{"----"}}
+    // };
+
+    view! { cx,
+            li(class="list-group-item") {
+                    (if n_haschild {
+                        let nx = n.clone();
+
+                      // view! {cx,  i(class="fa-regular fa-square-minus") (nx.name)
+
+                      //        (if *toggle.get() {
+                      //            let ch = nx.get_immediate_children(&nodes);
+                      //            let children = create_signal(cx, ch);
+                      //            view! { cx,
+                      //               ul {
+                      //                   Keyed(
+                      //                       iterable=children,
+                      //                       view=|cx, x: _| view! { cx,
+                      //                           li { (x.name) }
+                      //                       },
+                      //                       key=|x| x.id,
+                      //                   )
+                      //               }
+                      //           }
+
+                      //       } else {
+                      //           view! { cx, } // Now you don't
+                      //       }
+                      //        )
+
+                      //        div{"-"} /*(lambda_view())*/ }
+                   view!(cx, NestedNode(nx))
+                    } else {
+                        let nx = n.clone();
+                        view! { cx,  (nx.name)}
+                    })
+
+
+            }
+
+    }
+}
+
+#[component]
 fn App<G: Html>(cx: Scope) -> View<G> {
     let vec_nodes = vec![
         Node::new(1, None, "Node 1"),
@@ -71,6 +208,8 @@ fn App<G: Html>(cx: Scope) -> View<G> {
         Node::new(6, None, "Node 6"),
         Node::new(7, None, "Node 7"),
         Node::new(8, None, "Node 8"),
+        Node::new(9, Some(7), "Node 9"),
+        Node::new(10, Some(9), "node 10"),
     ];
 
     let node_list = NodeList {
@@ -83,6 +222,10 @@ fn App<G: Html>(cx: Scope) -> View<G> {
     // let root = build_tree(nodes);
 
     let node_context = provide_context(cx, node_state);
+    // provide_context(cx, node_state);
+
+    // let node_context = use_context::NodeState(cx);
+    // let all_nodes = node_context.clone().nodes.get().as_ref().clone().list;
 
     let root_nodes = node_context.nodes.get().get_root_nodes();
     // let roots: &[Node] = &root_nodes;
@@ -105,14 +248,17 @@ fn App<G: Html>(cx: Scope) -> View<G> {
                                             // let child_button = view! { cx, button{ i(class="fa-regular fa-square-plus")}};
                                             // let rnod = rnodes.clone();
                                             // let roots: &[Node] = rnod.get().as_ref().clone().as_slice();
-                                            let x_child = x.clone();
-                                            let roots = rnodes.get().as_ref().clone();
-                                             let n_haschild = format!("--{:#?}", x_child.has_child(&roots));
+
+                                            // let x_child = x.clone();
+                                            // // log!(format!("Node {:?}", &x_child.has_child(&root_nodes)));
+                                            // // let roots = rnodes.get().as_ref().clone();
+                                            //  let n_haschild =  x_child.has_child(&all_nodes);
 
                                             view! { cx,
-                                                    li(class="list-group-item") { (n_haschild) (x.name) hr() div{(format!("{:#?}", x_child))} }
+                                                    TreeNode(x)
+                                            }
 
-                                    }},
+                                        },
                                     key=|x| x.id,
                                 )
 
