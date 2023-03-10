@@ -3,10 +3,11 @@ use std::collections::HashMap;
 use serde_json::Value;
 use sycamore::prelude::*;
 pub mod widgets;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use serde_json::json;
-
+use serde_json::Map;
 use widgets::formlayout::FormLayout;
 use widgets::formresult::FormResult;
 
@@ -45,6 +46,135 @@ pub struct FormState {
 
 #[component]
 fn App<G: Html>(cx: Scope) -> View<G> {
+    // json_data update
+    let mut properties = Map::new();
+    properties.insert(
+        "firstName".to_owned(),
+        json!({
+            "type": "string",
+            "title": "First name",
+            "default": "Chuck"
+        }),
+    );
+
+    properties.insert(
+        "age".to_owned(),
+        json!({
+            "type": "integer",
+            "title": "Ente a number"
+        }),
+    );
+
+    properties.insert(
+        "datetime".to_owned(),
+        json!({
+            "type": "datetime",
+            "title": "Enter a Date and Time"
+        }),
+    );
+
+    properties.insert(
+        "url".to_owned(),
+        json!({
+            "type": "url",
+            "title": "Enter link"
+        }),
+    );
+
+    properties.insert(
+        "datalist".to_owned(),
+        json!({
+            "type": "datalist",
+            "title": "Datalist: Search and/or select",
+            "enum": [
+                {
+                    "name": "Option One",
+                    "key": "o1",
+                },
+                {
+                    "name": "Option 4",
+                    "key": "o4"
+                }
+            ]
+        }),
+    );
+
+    properties.insert(
+        "checkboxes".to_owned(),
+        json!({
+            "type": "checkbox",
+            "title": "select as many as possible",
+            "enum": [
+                {
+                    "name": "Item One",
+                    "key": "io",
+                    "checked": false
+                },
+                {
+                    "name": "Item 4",
+                    "key": "ity",
+                    "checked": false
+                }
+            ]
+        }),
+    );
+
+    properties.insert(
+        "color".to_owned(),
+        json!({
+            "type": "color",
+            "title": "Choose A Color"
+        }),
+    );
+
+    properties.insert(
+        "interval".to_owned(),
+        json!({
+            "type": "range",
+            "title": "Interval",
+            "minimal": 0,
+            "maximal": 100,
+            "multipleOf": 2
+        }),
+    );
+
+    properties.insert(
+        "bio".to_owned(),
+        json!({
+            "type": "textarea",
+            "title": "Bio",
+            "minLength": 5,
+            "maxLength": 10
+        }),
+    );
+
+    properties.insert(
+        "countries".to_owned(),
+        json!({
+            "type": "radio",
+            "title": "Number enum",
+            "enum": [
+                {
+                    "name": "New York",
+                    "key": "ny"
+                },
+                {
+                    "name": "Hong Kong",
+                    "key": "hongkong"
+                }
+            ]
+        }),
+    );
+
+    let json_data = json!({
+        "title": "A registration form",
+        "description": "A simple form example.",
+        "type": "object",
+        "required": ["firstName", "lastName"],
+        "properties": properties
+    });
+
+    // endof json_data udpate
     let json_data = json!({
       "title": "A registration form",
       "description": "A simple form example.",
