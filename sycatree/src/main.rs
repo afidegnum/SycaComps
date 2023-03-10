@@ -1,14 +1,14 @@
-// use std::collections::HashMap;
-
+use gloo::console::log;
 use serde::{Deserialize, Serialize};
 use sycamore::prelude::*;
+use wasm_bindgen::*;
+use web_sys::{DataTransfer, Event};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Node {
     pub id: i32,
     pub parent_id: Option<i32>,
     pub name: String,
-    pub children: Vec<Node>,
 }
 
 impl Node {
@@ -17,24 +17,11 @@ impl Node {
             id,
             parent_id,
             name: name.to_owned(),
-            children: vec![],
         }
     }
 
     fn has_child(&self, nodes: &[Node]) -> bool {
         nodes.iter().any(|n| n.parent_id == Some(self.id))
-    }
-
-    pub fn get_child_node(&self, id: i32) -> Option<Node> {
-        for child in self.children.iter() {
-            if child.id == id {
-                return Some(child.clone());
-            }
-            if let Some(node) = child.get_child_node(id) {
-                return Some(node);
-            }
-        }
-        None
     }
 
     pub fn get_immediate_children<'a>(&'a self, nodes: &'a [Node]) -> Vec<&'a Node> {
@@ -50,11 +37,6 @@ pub struct NodeList {
     pub list: Vec<Node>,
 }
 
-#[derive(Debug, Default, Clone)]
-pub struct NodeState {
-    pub nodes: RcSignal<NodeList>,
-}
-
 impl NodeList {
     pub fn get_root_nodes(&self) -> Vec<Node> {
         let mut root_nodes = Vec::new();
@@ -67,20 +49,28 @@ impl NodeList {
     }
 }
 
-#[component]
-fn NestedNode<G: Html>(cx: Scope, n: Node) -> View<G> {
-    let nm = n.clone();
-    let all_nodes = use_context::<NodeState>(cx);
-    let nodes = all_nodes.nodes.get().as_ref().clone().list;
-    // let ch = n.get_immediate_children(nodes.clone());
-    let ch = n
+#[derive(Debug, Default, Clone)]
+pub struct NodeState {
+    pub nodes: RcSignal<NodeList>,
+}
+
+#[component(inline_props)]
+fn NestedNode<'a, G: Html>(cx: Scope<'a>, n: Node, items: &'a Signal<Vec<Node>>) -> View<G> {
+    // modif
+    let node_ref = create_node_ref::<G>(cx);
+    let node = n.clone();
+    let nd = n.clone();
+    let nodes = items.get();
+    let top_children = n
         .get_immediate_children(&nodes)
         .into_iter()
         .cloned()
         .collect();
-    let chd = create_signal(cx, ch);
-    // let arr = nx.get_immediate_children(&nodes);
+
+    let children_signal = create_signal(cx, top_children);
+
     let toggle_state = create_signal(cx, false);
+
     let toggle = |_| {
         if *toggle_state.get() {
             toggle_state.set(false)
@@ -88,6 +78,7 @@ fn NestedNode<G: Html>(cx: Scope, n: Node) -> View<G> {
             toggle_state.set(true)
         }
     };
+
     let class = move || {
         format!(
             "fa-regular {}",
@@ -101,17 +92,73 @@ fn NestedNode<G: Html>(cx: Scope, n: Node) -> View<G> {
         )
     };
 
-    view! {cx,  i(on:click=toggle, class=class()) (nm.name)
+    let c_item = create_signal(cx, nd);
+    let handle_dragstart = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
+        let drag_event = drag_event_ref.clone();
+        let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
+        if e.type_().contains("dragstart") {
+            data_transf.set_effect_allowed("move");
+            data_transf
+                .set_data("text/html", &c_item.get().id.to_string())
+                .unwrap();
+
+            log!(format!("Transfer {:?}", &c_item.get()));
+        }
+        dom.set_attribute("style", "opacity: 0.2");
+    };
+
+    let handle_dragend = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.set_attribute("style", "opacity: 1");
+        log!(format!("{:?}", e.type_()));
+    };
+    let handle_dragenter = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.add_class("bg-primary");
+        log!(format!("{:?}", e.type_()));
+    };
+
+    let handle_dragover = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        e.prevent_default();
+        dom.add_class("bg-info");
+    };
+
+    let handle_dragleave = |e: Event| {
+        let dom = node_ref.get::<DomNode>();
+        dom.remove_class("bg-info");
+        log!(format!("{:?}", e));
+    };
+
+    let handle_drop = move |e: Event| {
+        let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
+        let drag_event = drag_event_ref.clone();
+        let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
+        let data = data_transf.get_data("text/html").unwrap();
+
+        log!(format!("{:?}", data.clone()));
+        log!(format!("{:?}", &c_item.get()));
+
+        let mut items = items.modify();
+        let dragged_index = items
+            .iter()
+            .position(|i| i.id == data.parse::<i32>().unwrap())
+            .unwrap();
+        let target_index = items.iter().position(|i| i.id == c_item.get().id).unwrap();
+        items.swap(dragged_index, target_index);
+    };
+
+    view! {cx,  i(on:click=toggle, class=class()) (node.name)
      (if *toggle_state.get() {
-         // let ch = nx.get_immediate_children(&nodes);
-         // let childr = create_signal(cx, ch);
+
          view! { cx,
             ul(class="list-group") {
                 Keyed(
-                    iterable=chd,
-                    view=|cx, x| view! { cx,
-                        // li { (x.name) }
-                       li(class="list-group-item") {NestedNode(x)}
+                    iterable=children_signal,
+                    view= move |cx, x| view! { cx,
+                       li(class="list-group-item", ref=node_ref, draggable=true, on:dragstart=handle_dragstart, on:dragend=handle_dragend, on:dragenter=handle_dragenter, on:dragover=handle_dragover, on:dragleave=handle_dragleave, on:drop=handle_drop) {NestedNode(n=x, items=items)}
                     },
                     key=|x| x.id,
                 )
@@ -125,67 +172,23 @@ fn NestedNode<G: Html>(cx: Scope, n: Node) -> View<G> {
         }
 }
 
-#[component]
-fn TreeNode<G: Html>(cx: Scope, n: Node) -> View<G> {
+#[component(inline_props)]
+fn TreeNode<'a, G: Html>(cx: Scope<'a>, n: Node, items: &'a Signal<Vec<Node>>) -> View<G> {
+    /*
     let all_nodes = use_context::<NodeState>(cx);
     let nodes = all_nodes.nodes.get().as_ref().clone().list;
     let x_child = n.clone();
-    // log!(format!("Node {:?}", &x_child.has_child(&root_nodes)));
-    // let roots = rnodes.get().as_ref().clone();
     let n_haschild = x_child.has_child(&nodes);
-    // let toggle = create_signal(cx, false);
-    // if toggle=true, fa-square-minus;
-    //      iterate display immmediate children -> iterate node.display_immediate_children.
-    //          if node.has_child, fa-square-plus
-    /*
-     *
-    let toggle = |_| state.set(*state.get() - 1);
-    let x = 5;
-    let fact = || {
-    fn helper(arg: u64) -> u64 {
-        match arg {
-            0 => 1,
-            _ => arg * helper(arg - 1),
-        }
-    }
-    helper(x)
-    };
-    assert_eq!(120, fact());
     */
 
-    // let toggle_view = move || {
-    //     view! { cx,  div{"----"}}
-    // };
-
+    let has_child = n.has_child(&items.get());
     view! { cx,
             li(class="list-group-item") {
-                    (if n_haschild {
+                    (if has_child {
                         let nx = n.clone();
 
-                      // view! {cx,  i(class="fa-regular fa-square-minus") (nx.name)
 
-                      //        (if *toggle.get() {
-                      //            let ch = nx.get_immediate_children(&nodes);
-                      //            let children = create_signal(cx, ch);
-                      //            view! { cx,
-                      //               ul {
-                      //                   Keyed(
-                      //                       iterable=children,
-                      //                       view=|cx, x: _| view! { cx,
-                      //                           li { (x.name) }
-                      //                       },
-                      //                       key=|x| x.id,
-                      //                   )
-                      //               }
-                      //           }
-
-                      //       } else {
-                      //           view! { cx, } // Now you don't
-                      //       }
-                      //        )
-
-                      //        div{"-"} /*(lambda_view())*/ }
-                   view!(cx, NestedNode(nx))
+                   view!(cx, NestedNode(n=nx, items=items))
                     } else {
                         let nx = n.clone();
                         view! { cx,  (nx.name)}
@@ -219,19 +222,10 @@ fn App<G: Html>(cx: Scope) -> View<G> {
     let node_state = NodeState {
         nodes: create_rc_signal(node_list.clone()),
     };
-    // let root = build_tree(nodes);
-
     let node_context = provide_context(cx, node_state);
-    // provide_context(cx, node_state);
-
-    // let node_context = use_context::NodeState(cx);
-    // let all_nodes = node_context.clone().nodes.get().as_ref().clone().list;
-
     let root_nodes = node_context.nodes.get().get_root_nodes();
-    // let roots: &[Node] = &root_nodes;
-    // let roots: Vec<Node> = root_nodes.to_owned();
-    // let y = &roots.clone();
-    // let roots = vec_nodes.get_root_nodes();
+
+    let vnodes = create_signal(cx, vec_nodes);
     let rnodes = create_signal(cx, root_nodes.clone());
 
     view! { cx,
@@ -245,19 +239,21 @@ fn App<G: Html>(cx: Scope) -> View<G> {
                                     iterable=rnodes,
                                     view= move |cx, x|
                                         {
-                                            // let child_button = view! { cx, button{ i(class="fa-regular fa-square-plus")}};
-                                            // let rnod = rnodes.clone();
-                                            // let roots: &[Node] = rnod.get().as_ref().clone().as_slice();
-
-                                            // let x_child = x.clone();
-                                            // // log!(format!("Node {:?}", &x_child.has_child(&root_nodes)));
-                                            // // let roots = rnodes.get().as_ref().clone();
-                                            //  let n_haschild =  x_child.has_child(&all_nodes);
-
                                             view! { cx,
-                                                    TreeNode(x)
-                                            }
+                                                    TreeNode(n=x, items=vnodes)
 
+                                                    /*
+                                                    li(class="list-group-item") {
+                                                        (if n_haschild {
+                                                            let nx = n.clone();
+                                                            view!(cx, NestedNode(nx))
+                                                        } else {
+                                                            let nx = n.clone();
+                                                            view! { cx,  (nx.name)}
+                                                        })
+                                                    }
+                                                    */
+                                                }
                                         },
                                     key=|x| x.id,
                                 )

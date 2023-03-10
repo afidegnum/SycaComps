@@ -1,11 +1,11 @@
 // https://htmldom.dev/make-a-draggable-element/
 
-use gloo::{console::log, utils::document};
+use gloo::console::log;
 use serde::{Deserialize, Serialize};
-use sycamore::generic_node::SycamoreElement;
+
 use sycamore::prelude::*;
 use wasm_bindgen::*;
-use web_sys::{DataTransfer, DragEvent, Element, Event, HtmlElement, MouseEvent};
+use web_sys::{DataTransfer, Event};
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -18,12 +18,6 @@ fn main() {
     });
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct Cat {
-    id: &'static str,
-    name: &'static str,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 struct ContentItem {
     id: i32,
@@ -32,72 +26,14 @@ struct ContentItem {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Contents {
-    items: Vec<ContentItem>,
+    contents: Vec<ContentItem>,
 }
-impl Contents {
-    pub fn swap_elements(
-        &mut self,
-        index1: usize,
-        index2: usize,
-    ) -> Option<Vec<(usize, &ContentItem)>> {
-        if let (Some(item1), Some(item2)) = (self.items.get(index1), self.items.get(index2)) {
-            self.items.swap(index1, index2);
-            let updated_list = self
-                .items
-                .iter()
-                .enumerate()
-                .map(|(index, item)| (index, item))
-                .collect();
-            return Some(updated_list);
-        }
-        None
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct ItemSwitch {
-    // contents: RcSignal<Vec<ContentItem>>,
-    contents: RcSignal<Contents>,
-}
-
-// impl ItemSwitch {
-//     fn switch(self, first: usize, last: usize) -> ItemSwitch {
-//         self.contents.modify().swap(first, last);
-//         self.contents.track();
-//         // self.item.swap(first, last);
-//         self
-//     }
-// }
 
 #[component]
 fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
-    /*
-    let new_items = create_rc_signal(ItemSwitch {
-            contents: create_rc_signal(
-                vec![
-                ContentItem {
-                    id: 0,
-                    name: "Test item 0".to_string(),
-                },
-                ContentItem {
-                    id: 1,
-                    name: "Test item 1".to_string(),
-                },
-                ContentItem {
-                    id: 2,
-                    name: "Test item 2".to_string(),
-                },
-                ContentItem {
-                    id: 3,
-                    name: "Test item 3".to_string(),
-                },
-            ]
-    ),
-        });
-
-        */
-    let rc_items = create_rc_signal(Contents {
-        items: vec![
+    let contents = create_signal(
+        cx,
+        vec![
             ContentItem {
                 id: 0,
                 name: "Test item 0".to_string(),
@@ -115,26 +51,30 @@ fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
                 name: "Test item 3".to_string(),
             },
         ],
-    });
-
-    let new_items = ItemSwitch { contents: rc_items };
-
-    provide_context(cx, new_items);
+    );
 
     view! { cx,
-        div(class="container") {
-             DropZone{}
-
+        div(class = "container") {
+            div(class="box") {
+                Keyed(
+                    iterable=contents,
+                    view= move |cx, item| view! { cx, Item(c = item, items = contents) },
+                    key=|item| item.id,
+                )
+            }
         }
     }
 }
+// modified draggable
 
 #[component(inline_props)]
-fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
+fn Item<'a, G: Html>(
+    cx: Scope<'a>,
+    c: ContentItem,
+    items: &'a Signal<Vec<ContentItem>>,
+) -> View<G> {
     let node_ref = create_node_ref(cx);
-    let a_index = create_signal(cx, a);
     let c_item = create_signal(cx, c);
-
     let handle_dragstart = |e: Event| {
         let dom = node_ref.get::<DomNode>();
         let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
@@ -143,10 +83,10 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
         if e.type_().contains("dragstart") {
             data_transf.set_effect_allowed("move");
             data_transf
-                .set_data("text/html", &a_index.get().to_string())
+                .set_data("text/html", &c_item.get().id.to_string())
                 .unwrap();
 
-            log!(format!("Transfer {:?}", &a_index.get()));
+            log!(format!("Transfer {:?}", &c_item.get()));
         }
         dom.set_attribute("style", "opacity: 0.2");
     };
@@ -154,11 +94,12 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
     let handle_dragend = |e: Event| {
         let dom = node_ref.get::<DomNode>();
         dom.set_attribute("style", "opacity: 1");
+        log!(format!("{:?}", e.type_()));
     };
     let handle_dragenter = |e: Event| {
         let dom = node_ref.get::<DomNode>();
         dom.add_class("drag-over");
-        // log!(format!("{:?}", e.type_()));
+        log!(format!("{:?}", e.type_()));
     };
 
     let handle_dragover = |e: Event| {
@@ -170,82 +111,30 @@ fn DraggableItem<G: Html>(cx: Scope, a: usize, c: ContentItem) -> View<G> {
     let handle_dragleave = |e: Event| {
         let dom = node_ref.get::<DomNode>();
         dom.remove_class("drag-over");
+        log!(format!("{:?}", e));
     };
 
     let handle_drop = move |e: Event| {
-        let dom = node_ref.get::<DomNode>();
-
         let drag_event_ref: &web_sys::DragEvent = e.unchecked_ref();
         let drag_event = drag_event_ref.clone();
         let data_transf: DataTransfer = drag_event.data_transfer().unwrap();
         let data = data_transf.get_data("text/html").unwrap();
+
         log!(format!("{:?}", data.clone()));
-        log!(format!("{:?}", &a_index.get()));
-        let switch_item = use_context::<RcSignal<ItemSwitch>>(cx);
-        let sv = switch_item.get().as_ref().clone();
-        let t = sv
-            .contents
-            .get()
-            .as_ref()
-            .clone()
-            .swap_elements(data.parse::<usize>().unwrap(), *a_index.get())
+        log!(format!("{:?}", &c_item.get()));
+
+        let mut items = items.modify();
+        let dragged_index = items
+            .iter()
+            .position(|i| i.id == data.parse::<i32>().unwrap())
             .unwrap();
-        // let sv = &*switch_item.get();
-        // sv.clone().switch(data.parse::<usize>().unwrap(), *a_index.get());
+        let target_index = items.iter().position(|i| i.id == c_item.get().id).unwrap();
+        items.swap(dragged_index, target_index);
     };
 
     view! { cx,
         div(ref=node_ref, draggable=true, class="item", on:dragstart=handle_dragstart, on:dragend=handle_dragend, on:dragenter=handle_dragenter, on:dragover=handle_dragover, on:dragleave=handle_dragleave, on:drop=handle_drop) {
-             //ItemWidget{}
             (c_item.get().name)
-        }
-    }
-}
-
-#[component]
-fn DropZone<G: Html>(cx: Scope) -> View<G> {
-    let node_ref = create_node_ref(cx);
-    let item_contents = use_context::<RcSignal<ItemSwitch>>(cx);
-
-    let values = create_memo(cx, move || {
-        let it_sw = item_contents
-            .get()
-            .as_ref()
-            .clone()
-            .contents
-            .get()
-            .as_ref()
-            .clone()
-            .items;
-        let is = it_sw
-            .into_iter()
-            .enumerate()
-            .collect::<Vec<(usize, ContentItem)>>();
-        is
-
-        /*
-        let it_sw = &*item_contents.clone().get().contents.get();
-        let is = it_sw
-            .into_iter()
-            .cloned()
-            .enumerate()
-            .collect::<Vec<(usize, ContentItem)>>();
-        is
-        */
-    });
-
-    view! { cx,
-        div(ref=node_ref, class="box") {
-             // DraggableItem{}
-            Keyed(
-                iterable=values,
-                    view=|cx, (i, x)|
-                        view! { cx,
-                                // li { (x) }
-                                DraggableItem(a=i, c=x )
-                },
-                key=|x| x.1.id,
-            )
         }
     }
 }
