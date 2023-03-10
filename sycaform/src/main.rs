@@ -191,6 +191,37 @@ fn App<G: Html>(cx: Scope) -> View<G> {
     }
     );
 
+    let ui_schema = json!(
+            {
+      "firstName": {
+        "ui:autofocus": true,
+        "ui:emptyValue": "",
+        "ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
+        "ui:autocomplete": "family-name"
+      },
+      "lastName": {
+        "ui:autocomplete": "given-name"
+      },
+      "age": {
+        "ui:widget": "updown",
+        "ui:title": "Age of person",
+        "ui:description": "(earth year)"
+      },
+      "bio": {
+        "ui:widget": "textarea"
+      },
+      "password": {
+        "ui:widget": "password",
+        "ui:help": "Hint: Make it strong!"
+      },
+      "telephone": {
+        "ui:options": {
+          "inputType": "tel"
+        }
+      }
+    }
+        );
+
     let json_form: Form = serde_json::from_value(json_data).unwrap();
     println!("JSON form: {:?}", json_form);
 

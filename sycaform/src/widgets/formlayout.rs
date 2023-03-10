@@ -1,3 +1,4 @@
+use serde_json::json;
 use sycamore::prelude::*;
 
 use crate::FormState;
@@ -7,8 +8,8 @@ use super::inputform::InputForm;
 #[component]
 pub fn FormLayout<G: Html>(cx: Scope, formsig: FormState) -> View<G> {
     let fg = formsig.formstate.get().as_ref().clone();
-
     let form_vec = Vec::from_iter(fg.properties.into_iter());
+    // let form_vec = json!(fg.properties.into_iter());
     let form_signal = create_signal(cx, form_vec);
 
     view! { cx,
