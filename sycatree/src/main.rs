@@ -41,15 +41,13 @@ pub struct NodeList {
 }
 
 impl NodeList {
-    pub fn get_root_nodes(&self) -> RcSignal<Self> {
+    pub fn get_root_nodes(&self) -> Vec<Node> {
         let mut root_nodes = Vec::new();
         for node in self.list.iter() {
             if node.parent_id.is_none() {
                 root_nodes.push(node.clone());
             }
         }
-        let root_nodes = Self { list: root_nodes };
-        let root_nodes = create_rc_signal(root_nodes);
         root_nodes
     }
 }
@@ -405,20 +403,20 @@ fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
         Node::new(12, Some(7), "node 12"),
     ];
 
-    // let root_nodes = NodeList {
-    //     list: vec_nodes.clone(),
-    // };
+    let core_nodes = NodeList {
+        list: vec_nodes.clone(),
+    };
 
     // let node_list = create_signal(cx, root_nodes);
 
-    let signal_nodes = NodeState {
-        nodes: create_rc_signal(vec_nodes),
-    };
-    let sn = signal_nodes.clone();
-    // let root_nodes = root_nodes.get_root_nodes();
-    // let root_nodes = create_signal(cx, root_nodes.clone());
-    // let node_list = create_signal(cx, vec_nodes.clone());
-    // node_list.track();
+    // let signal_nodes = NodeState {
+    //     nodes: create_rc_signal(vec_nodes),
+    // };
+
+    let root_nodes = core_nodes.get_root_nodes();
+    let root_nodes = create_signal(cx, root_nodes.clone());
+    let node_list = create_signal(cx, vec_nodes.clone());
+    node_list.track();
 
     view! { cx,
         div(class = "container") {
@@ -426,9 +424,9 @@ fn ContainerWidget<G: Html>(cx: Scope) -> View<G> {
                 div(class="col-3"){
                     ul(class="list-group"){
                 Indexed(
-                    iterable={let x = signal_nodes.clone(); &x.nodes},
-                    view= move |cx, item|{ // let sn = signal_nodes.clone();
-                                           view! { cx, NestedNode(n = item, nodes_sig = &sn.nodes) }},
+                    iterable=root_nodes,
+                    view= move |cx, item|
+                                           view! { cx, NestedNode(n = item, nodes_sig = node_list) },
                     // key=|item| item.id,
                 )
                   }
