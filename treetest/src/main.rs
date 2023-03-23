@@ -29,6 +29,13 @@ impl Node {
             None => println!("Node {} has no immediate child.", self.id),
         }
     }
+
+    pub fn get_immediate_children<'a>(&'a self, nodes: &'a [Node]) -> Vec<&Node> {
+        nodes
+            .iter()
+            .filter(|n| n.parent_id == Some(self.id))
+            .collect()
+    }
 }
 
 #[derive(Debug, Default, Clone)]
@@ -64,9 +71,23 @@ fn main() {
         Node::new(7, None, "Node 7"),
         Node::new(8, None, "Node 8"),
     ];
-    let node_1 = &vec_nodes[7];
+
+    let vecs = vec_nodes.clone();
+    let node_1 = &vec_nodes[1];
     // node_1.has_child(&vec_nodes);
 
-    println!("{}", node_1.has_child(&vec_nodes));
-    println!("{:#?}", node_1);
+    // println!("{}", node_1.has_child(&vec_nodes));
+    // println!("{:#?}", node_1);
+
+    // let node_list = NodeList { list: vec_nodes };
+
+    // let all_nodes = node_list.clone();
+    // let root_nodes = node_list.get_root_nodes();
+
+    // for r in root_nodes {
+    //     println!("{:#?}", &r.has_child(&all_nodes.list));
+    // }
+
+    let children = node_1.get_immediate_children(&vecs);
+    print!("{:#?}", children);
 }

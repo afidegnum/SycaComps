@@ -5,10 +5,9 @@ pub mod date;
 pub mod datetime;
 pub mod email;
 pub mod fileinput;
-pub mod formlayout;
-pub mod formresult;
+
 pub mod image;
-pub mod inputform;
+
 pub mod integer;
 pub mod password;
 pub mod radio;

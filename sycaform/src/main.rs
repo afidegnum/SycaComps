@@ -1,15 +1,17 @@
 use std::collections::HashMap;
-
-use serde_json::Value;
-use sycamore::prelude::*;
+pub mod formlayout;
+pub mod formresult;
+pub mod inputform;
 pub mod widgets;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json;
-use serde_json::json;
-use serde_json::Map;
-use widgets::formlayout::FormLayout;
-use widgets::formresult::FormResult;
+use serde_json::{json, Value};
+use sycamore::prelude::*;
+// use widgets::formlayout::FormLayout;
+// use widgets::formresult::FormResult;
+use formlayout::FormLayout;
+use formresult::FormResult;
 
 // macro_rules! node_ref {
 //     ($($id:expr)*) => {
@@ -21,22 +23,29 @@ use widgets::formresult::FormResult;
 //     }
 // }
 
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// pub struct Form {
+//     pub title: String,
+//     pub description: String,
+//     required: Vec<String>, // point Vec to properties field.
+//     properties: IndexMap<String, Value>,
+//     // ui_schema: IndexMap<String, Value>,
+// }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Form {
-    pub title: String,
-    pub description: String,
-    required: Vec<String>, // point Vec to properties field.
-    properties: HashMap<String, Value>,
+    schema: IndexMap<String, Value>,
+    ui_schema: IndexMap<String, Value>,
+    merged_schema: IndexMap<String, Value>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FormExportData {
-    pub field_data: HashMap<String, Value>,
+    pub field_data: IndexMap<String, Value>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FormData {
-    pub data: RcSignal<HashMap<String, Value>>,
+    pub data: RcSignal<IndexMap<String, Value>>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -46,136 +55,8 @@ pub struct FormState {
 
 #[component]
 fn App<G: Html>(cx: Scope) -> View<G> {
-    // json_data update
-    // let mut properties = Map::new();
-    // properties.insert(
-    //     "firstName".to_owned(),
-    //     json!({
-    //         "type": "string",
-    //         "title": "First name",
-    //         "default": "Chuck"
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "age".to_owned(),
-    //     json!({
-    //         "type": "integer",
-    //         "title": "Ente a number"
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "datetime".to_owned(),
-    //     json!({
-    //         "type": "string",
-    //         "title": "Enter a Date and Time"
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "url".to_owned(),
-    //     json!({
-    //         "type": "string",
-    //         "title": "Enter link"
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "datalist".to_owned(),
-    //     json!({
-    //         "type": "datalist",
-    //         "title": "Datalist: Search and/or select",
-    //         "enum": [
-    //             {
-    //                 "name": "Option One",
-    //                 "key": "o1",
-    //             },
-    //             {
-    //                 "name": "Option 4",
-    //                 "key": "o4"
-    //             }
-    //         ]
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "checkboxes".to_owned(),
-    //     json!({
-    //         "type": "checkbox",
-    //         "title": "select as many as possible",
-    //         "enum": [
-    //             {
-    //                 "name": "Item One",
-    //                 "key": "io",
-    //                 "checked": false
-    //             },
-    //             {
-    //                 "name": "Item 4",
-    //                 "key": "ity",
-    //                 "checked": false
-    //             }
-    //         ]
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "color".to_owned(),
-    //     json!({
-    //         "type": "color",
-    //         "title": "Choose A Color"
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "interval".to_owned(),
-    //     json!({
-    //         "type": "range",
-    //         "title": "Interval",
-    //         "minimal": 0,
-    //         "maximal": 100,
-    //         "multipleOf": 2
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "bio".to_owned(),
-    //     json!({
-    //         "type": "textarea",
-    //         "title": "Bio",
-    //         "minLength": 5,
-    //         "maxLength": 10
-    //     }),
-    // );
-
-    // properties.insert(
-    //     "countries".to_owned(),
-    //     json!({
-    //         "type": "radio",
-    //         "title": "Number enum",
-    //         "enum": [
-    //             {
-    //                 "name": "New York",
-    //                 "key": "ny"
-    //             },
-    //             {
-    //                 "name": "Hong Kong",
-    //                 "key": "hongkong"
-    //             }
-    //         ]
-    //     }),
-    // );
-
-    // let json_data = json!({
-    //     "title": "A registration form",
-    //     "description": "A simple form example.",
-    //     "type": "object",
-    //     "required": ["firstName", "lastName"],
-    //     "properties": properties
-    // });
-
     // endof json_data udpate
-    let json_data = json!({
+    let schema = json!({
       "title": "A registration form",
       "description": "A simple form example.",
       "type": "object",
@@ -198,29 +79,29 @@ fn App<G: Html>(cx: Scope) -> View<G> {
           "title": "Ente a number"
         },
           "date": {
-          "type": "date",
+          "type": "string",
           "title": "Enter a Date"
         },
           "datetime": {
-          "type": "datetime",
+          "type": "string",
           "title": "Enter a Date and Time"
         },
           "file": {
-          "type": "file",
+          "type": "string",
           "title": "Upload a File",
           "accept": "",
           "multiple": false
         },
           "url": {
-          "type": "url",
+          "type": "string",
           "title": "Enter link"
         },
           "search": {
-          "type": "search",
+          "type": "string",
           "title": "Search"
         },
          "datalist": {
-          "type": "datalist",
+          "type": "array",
           "title": "Datalist: Search and/or select",
             "enum": [
             {
@@ -242,7 +123,7 @@ fn App<G: Html>(cx: Scope) -> View<G> {
             ]
         },
           "checkboxes": {
-          "type": "checkbox",
+          "type": "array",
           "title": "select as many as possible",
            "enum": [
             {
@@ -271,11 +152,11 @@ fn App<G: Html>(cx: Scope) -> View<G> {
             ]
         },
          "color": {
-          "type": "color",
+          "type": "string",
           "title": "Choose A Color"
         },
          "interval": {
-          "type": "range",
+          "type": "integer",
           "title": "Interval",
            "minimal": 0,
            "maximal": 100,
@@ -283,13 +164,13 @@ fn App<G: Html>(cx: Scope) -> View<G> {
 
         },
         "bio": {
-          "type": "textarea",
+          "type": "string",
           "title": "Bio",
           "minLength": 5,
           "maxLength": 10,
         },
         "password": {
-          "type": "password",
+          "type": "string",
           "title": "Password",
           "minLength": 3
         },
@@ -299,7 +180,7 @@ fn App<G: Html>(cx: Scope) -> View<G> {
           "minLength": 5
         },
          "countries": {
-         "type": "radio",
+         "type": "array",
             "title": "Number enum",
             "enum": [
             {
@@ -322,56 +203,142 @@ fn App<G: Html>(cx: Scope) -> View<G> {
     );
 
     let ui_schema = json!(
-            {
-      "firstName": {
-        "ui:autofocus": true,
-        "ui:emptyValue": "",
-        "ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
-        "ui:autocomplete": "family-name"
-      },
-      "lastName": {
-        "ui:autocomplete": "given-name"
-      },
-      "age": {
-        "ui:widget": "updown",
-        "ui:title": "Age of person",
-        "ui:description": "(earth year)"
-      },
-      "bio": {
-        "ui:widget": "textarea"
-      },
-      "password": {
-        "ui:widget": "password",
-        "ui:help": "Hint: Make it strong!"
-      },
-      "telephone": {
-        "ui:options": {
-          "inputType": "tel"
+    {
+        "type": "HorizontalLayout",
+        "elements": [
+        {
+            "firstName": {
+                "ui:autofocus": true,
+                "ui:emptyValue": "",
+                "ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
+                "ui:autocomplete": "family-name",
+                "ui:widget": "textinput"
+
+            },
+            "lastName": {
+                "ui:autocomplete": "given-name",
+                 "ui:widget": "textinput"
+
+            },
+            "age": {
+                "ui:widget": "updown",
+                "ui:title": "Age of person",
+                "ui:description": "(earth year)",
+                 "ui:widget": "integer"
+
+            },
+            "date" : {"ui:widget" : "date"},
+            "datetime" : {"ui:widget" : "datetime"},
+            "file" : {"ui:widget" : "file"},
+            "url" : {"ui:widget" : "url"},
+             "search" : {"ui:widget" : "search"},
+            "datalist" : {"ui:widget" : "datalist"},
+            "checkboxes" : {"ui:widget" : "checkbox"},
+            "color" : {"ui:widget" : "color"},
+            "interval" : {"ui:widget" : "range"},
+            "bio": {
+                "ui:widget": "textarea"
+            },
+            "password": {
+                "ui:widget": "password",
+                "ui:help": "Hint: Make it strong!"
+            },
+            "telephone": {
+                 "ui:widget": "textinput",
+                "ui:options": {
+                    "inputType": "tel"
+                }
+            },
+             "countries" : {"ui:widget" : "radio"},
+
         }
-      }
+        ]
     }
-        );
+    );
 
-    let json_form: Form = serde_json::from_value(json_data).unwrap();
-    println!("JSON form: {:?}", json_form);
+    let required_properties = schema["required"]
+        .as_array()
+        .map(|a| a.iter().map(|v| v.as_str()).collect::<Option<Vec<&str>>>())
+        .flatten()
+        .unwrap_or_default();
 
-    let required = &json_form.required;
-    let mut properties = json_form.properties.clone();
-    for (key, value) in properties.iter_mut() {
-        if required.contains(key) {
-            value["required"] = json!(true);
+    let modified_properties = schema["properties"]
+        .as_object()
+        .map(|o| {
+            o.iter()
+                .map(|(name, prop)| {
+                    let mut prop = prop.clone();
+                    if required_properties.contains(&name.as_str()) {
+                        if let serde_json::Value::Object(ref mut obj) = prop {
+                            obj.insert("required".to_owned(), serde_json::Value::Bool(true));
+                        }
+                    }
+                    (name.to_owned(), prop)
+                })
+                .collect()
+        })
+        .unwrap_or_else(|| IndexMap::new());
+
+    let modified_data = json!({
+        "title": schema["title"],
+        "description": schema["description"],
+        "type": schema["type"],
+        "required": schema["required"],
+        "properties": modified_properties
+    });
+
+    let mut merged_schema = IndexMap::new();
+
+    if let Some(properties) = modified_data.get("properties") {
+        if let Some(properties_obj) = properties.as_object() {
+            for (prop_name, prop_val) in properties_obj.iter() {
+                if let Some(element) = ui_schema.get("elements") {
+                    if let Some(element_arr) = element.as_array() {
+                        for obj in element_arr.iter() {
+                            if let Some(inner_obj) = obj.as_object() {
+                                if let Some(field_val) = inner_obj.get(prop_name) {
+                                    let mut merged_field = prop_val.as_object().unwrap().clone();
+                                    let mut element_field = field_val.as_object().unwrap().clone();
+                                    merged_field.append(&mut element_field);
+                                    merged_schema
+                                        .insert(prop_name.to_string(), Value::Object(merged_field));
+                                } else {
+                                    merged_schema.insert(prop_name.to_string(), prop_val.clone());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    let mut json_form = json_form;
-    json_form.properties = properties;
+    let full_schema = Form {
+        schema: serde_json::from_value(modified_data).unwrap(),
+        ui_schema: serde_json::from_value(ui_schema).unwrap(),
+        merged_schema,
+    };
+
+    // let required = &json_form.required;
+    // let mut properties = json_form.properties.clone();
+    // for (key, value) in properties.iter_mut() {
+    //     if required.contains(key) {
+    //         value["required"] = json!(true);
+    //     }
+    // }
+
+    // let mut json_form = json_form;
+    // json_form.properties = properties;
+
+    // let ui_schema_map: IndexMap<String, Value> = serde_json::from_value(ui_schema).unwrap();
+    // json_form.ui_schema = ui_schema_map;
 
     let form_state = FormState {
-        formstate: create_rc_signal(json_form),
+        formstate: create_rc_signal(full_schema),
     };
 
     let form_data = FormData {
-        data: create_rc_signal(HashMap::new()),
+        data: create_rc_signal(IndexMap::new()),
     };
 
     let new_state = form_state.clone();
@@ -417,7 +384,7 @@ fn App<G: Html>(cx: Scope) -> View<G> {
                             h5 (class="card-title") {"Initial Form Data"}
 
                             pre (class="card-text")
-                    {(format!("{:#?}", new_state.formstate.get())) }
+                    {(format!("{:#?}", new_state.formstate.get().merged_schema)) }
 
                         }
 
