@@ -1,11 +1,9 @@
-use std::collections::HashMap;
 pub mod formlayout;
 pub mod formresult;
 pub mod inputform;
 pub mod widgets;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use serde_json;
 use serde_json::{json, Value};
 use sycamore::prelude::*;
 // use widgets::formlayout::FormLayout;
@@ -68,11 +66,15 @@ fn App<G: Html>(cx: Scope) -> View<G> {
         "firstName": {
           "type": "string",
           "title": "First name",
-          "default": "Chuck"
+          "default": "Chuck",
+           "minLength": 5,
+          "maxLength": 10
         },
         "lastName": {
           "type": "string",
-          "title": "Last name"
+          "title": "Last name",
+           "minLength": 5,
+          "maxLength": 10
         },
         "age": {
           "type": "integer",
@@ -172,7 +174,8 @@ fn App<G: Html>(cx: Scope) -> View<G> {
         "password": {
           "type": "string",
           "title": "Password",
-          "minLength": 3
+          "minLength": 5,
+          "maxLength": 15
         },
         "telephone": {
           "type": "string",
@@ -258,8 +261,9 @@ fn App<G: Html>(cx: Scope) -> View<G> {
 
     let required_properties = schema["required"]
         .as_array()
-        .map(|a| a.iter().map(|v| v.as_str()).collect::<Option<Vec<&str>>>())
-        .flatten()
+        // .map(|a| a.iter().map(|v| v.as_str()).collect::<Option<Vec<&str>>>())
+        // .flatten()
+        .and_then(|a| a.iter().map(|v| v.as_str()).collect::<Option<Vec<&str>>>())
         .unwrap_or_default();
 
     let modified_properties = schema["properties"]

@@ -1,4 +1,3 @@
-use gloo::console::log;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -34,13 +33,7 @@ struct Array {
 
 #[component]
 pub fn InputForm<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
-    let field_type =
-        s.1.clone()
-            .get("ui:widget")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
+    let field_type = s.1.get("ui:widget").unwrap().as_str().unwrap().to_owned();
 
     let y = s.clone();
 

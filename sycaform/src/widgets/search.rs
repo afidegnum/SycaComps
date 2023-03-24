@@ -10,54 +10,76 @@ pub fn SearchInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
 
-    let binding = s.1.clone();
+    let binding = s.1;
+
+    // let min_length = binding.get("minLength");
+    // let min_length = match min_length {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
+    // let max_length = binding.get("maxLength");
+    // let max_length = match max_length {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
+    // let default_value = binding.get("default");
+    // let default_value = match default_value {
+    //     Some(x) => match x {
+    //         Value::String(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
+    // let is_required = binding.get("required");
+    // let required_mark = create_signal(cx, "");
+    // let is_required = match is_required {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => {
+    //             required_mark.set("*");
+    //             *n
+    //         }
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
+
     let min_length = binding.get("minLength");
-
     let min_length = match min_length {
-        Some(x) => match x {
-            Value::Number(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+        Some(Value::Number(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
 
     let max_length = binding.get("maxLength");
     let max_length = match max_length {
-        Some(x) => match x {
-            Value::Number(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+        Some(Value::Number(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
 
     let default_value = binding.get("default");
     let default_value = match default_value {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+        Some(Value::String(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
 
     let is_required = binding.get("required");
     let required_mark = create_signal(cx, "");
     let is_required = match is_required {
-        Some(x) => match x {
-            Value::Bool(n) => {
-                required_mark.set("*");
-                *n
-            }
-            _ => false,
-        },
-        None => false,
+        Some(Value::Bool(n)) => {
+            required_mark.set("*");
+            *n
+        }
+        _ => false,
     };
 
     let validation_message = create_signal(cx, ("valid-feedback", ""));
@@ -85,7 +107,7 @@ pub fn SearchInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
         {
             validation_message.set(("valid-feedback", "looks good"));
         } else {
-            validation_message.set(("valid-feedback", "looks good"));
+            validation_message.set(("valid-feedback", "Ok"));
         }
     };
 
@@ -104,7 +126,7 @@ pub fn SearchInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
         // let f_name: String = s.0.clone();
         let mut this_data = HashMap::new();
-        this_data.insert(form_name.clone(), val.to_owned());
+        this_data.insert(form_name.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());

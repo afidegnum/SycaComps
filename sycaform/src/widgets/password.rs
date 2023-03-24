@@ -10,34 +10,40 @@ pub fn PassWordInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
 
-    let binding = s.1.clone();
+    let binding = s.1;
 
-    let min_length = binding.get("minLength");
+    // let min_length = binding.get("minLength");
 
-    let min_length = match min_length {
-        Some(x) => match x {
-            Value::Number(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
-    };
+    // let min_length = match min_length {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
 
-    let max_length = binding.get("maxLength");
-    let max_length = match max_length {
-        Some(x) => match x {
-            Value::Number(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
-    };
+    // let max_length = binding.get("maxLength");
+    // let max_length = match max_length {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
+    let min_length = binding
+        .get("minLength")
+        .and_then(|v| v.as_u64())
+        .map(|n| n.to_string())
+        .unwrap_or("".to_owned());
+
+    let max_length = binding
+        .get("maxLength")
+        .and_then(|v| v.as_u64())
+        .map(|n| n.to_string())
+        .unwrap_or("".to_owned());
 
     let validation_message = create_signal(cx, ("valid-feedback", ""));
     // validation lists
@@ -61,13 +67,17 @@ pub fn PassWordInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
             validation_message.set(("invalid-feedback", "character exceeded stay within range"));
         }
     };
-    let is_required = binding.get("required");
-    let is_required = match is_required {
-        Some(x) => match x {
-            Value::Bool(n) => *n,
-            _ => false,
-        },
-        None => false,
+    // let is_required = binding.get("required");
+    // let is_required = match is_required {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => *n,
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
+    let is_required = match binding.get("required") {
+        Some(Value::Bool(n)) => *n,
+        _ => false,
     };
 
     let handle_blur = move || {
@@ -78,7 +88,7 @@ pub fn PassWordInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
         // let f_name: String = s.0.clone();
         let mut this_data = HashMap::new();
-        this_data.insert(form_name.clone(), val.to_owned());
+        this_data.insert(form_name.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());

@@ -8,22 +8,12 @@ pub fn DataList<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let _form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
-    let binding = s.1.clone();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
+    let binding = s.1;
 
-    let default_value = binding.get("default");
-    let default_value = match default_value {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+    let default_value = match binding.get("default") {
+        Some(Value::String(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
 
     // let items_list = binding
@@ -65,6 +55,11 @@ pub fn DataList<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let sample_data = create_signal(cx, default_value.clone());
 
     let data_context = use_context::<FormData>(cx);
+    let check_empty = move |s: String| {
+        if s.is_empty() {
+            validation_message.set(("invalid-feedback", "this must not be empty"));
+        }
+    };
 
     // let items_list = binding.get("enum").cloned();
     // let get_key =
@@ -72,17 +67,17 @@ pub fn DataList<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
     let items_signal = create_signal(cx, items.clone());
     // let it = items.clone();
-    let fname = form_name.clone();
+    let fname = form_name;
     let handle_blur = move || {
         let datum = sample_data.get().as_ref().clone();
-        // check_empty(datum.clone());
+        check_empty(datum.clone());
         //check_length(sample_data.get().as_ref().clone());
 
         let val: Value = serde_json::from_str(&format!("\"{}\"", datum)).unwrap();
 
         // let f_name: String = s.0.clone();
         let mut this_data = HashMap::new();
-        this_data.insert(fname.clone(), val.to_owned());
+        this_data.insert(fname.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());

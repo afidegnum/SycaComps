@@ -8,14 +8,8 @@ pub fn RadioInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let _form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
-    let binding = s.1.clone();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
+    let binding = s.1;
 
     // let default_value = binding.get("default");
     // let default_value = match default_value {
@@ -124,7 +118,7 @@ pub fn RadioInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
                                         // let f_name: String = s.0.clone();
                                         let mut this_data = HashMap::new();
-                                        this_data.insert(fname, val.to_owned());
+                                        this_data.insert(fname, val);
 
                                         let mut dt = data_context.data.get().as_ref().clone();
                                         dt.extend(this_data.clone());

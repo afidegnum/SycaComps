@@ -1,3 +1,4 @@
+use indexmap::IndexMap;
 use std::collections::HashMap;
 
 use serde_json::Value;
@@ -10,54 +11,77 @@ pub fn TextInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
 
-    let binding = s.1.clone();
+    let binding = s.1;
+    // let min_length = binding.get("minLength");
+
+    // let min_length = match min_length {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
+    // let max_length = binding.get("maxLength");
+    // let max_length = match max_length {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
+    // let default_value = binding.get("default");
+    // let default_value = match default_value {
+    //     Some(x) => match x {
+    //         Value::String(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
+    // let is_required = binding.get("required");
+    // let required_mark = create_signal(cx, "");
+    // match is_required {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => {
+    //             required_mark.set("*");
+    //             *n
+    //         }
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
+
     let min_length = binding.get("minLength");
-
     let min_length = match min_length {
-        Some(x) => match x {
-            Value::Number(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+        Some(Value::Number(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
 
     let max_length = binding.get("maxLength");
     let max_length = match max_length {
-        Some(x) => match x {
-            Value::Number(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+        Some(Value::Number(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
 
     let default_value = binding.get("default");
     let default_value = match default_value {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+        Some(Value::String(n)) => n.to_string(),
+        _ => "".to_owned(),
+        _ => "".to_owned(),
     };
 
     let is_required = binding.get("required");
     let required_mark = create_signal(cx, "");
     let is_required = match is_required {
-        Some(x) => match x {
-            Value::Bool(n) => {
-                required_mark.set("*");
-                *n
-            }
-            _ => false,
-        },
-        None => false,
+        Some(Value::Bool(n)) => {
+            required_mark.set("*");
+            *n
+        }
+        _ => false,
     };
 
     let validation_message = create_signal(cx, ("valid-feedback", ""));
@@ -72,8 +96,8 @@ pub fn TextInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
     let data_context = use_context::<FormData>(cx);
 
-    let min_l = min_length.clone();
-    let max_l = max_length.clone();
+    let min_l = min_length;
+    let max_l = max_length;
     let check_length = move |s: String| {
         let length = s.len();
         if length < (min_l.parse::<usize>().unwrap() - 1) {
@@ -85,7 +109,7 @@ pub fn TextInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
         {
             validation_message.set(("valid-feedback", "looks good"));
         } else {
-            validation_message.set(("valid-feedback", "looks good"));
+            validation_message.set(("valid-feedback", "Ok"));
         }
     };
 
@@ -98,13 +122,14 @@ pub fn TextInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let handle_blur = move || {
         let datum = sample_data.get().as_ref().clone();
         check_empty(datum.clone());
-        // check_length(sample_data.get().as_ref().clone());
+
+        check_length(sample_data.get().as_ref().clone());
 
         let val: Value = serde_json::from_str(&format!("\"{}\"", datum)).unwrap();
 
         // let f_name: String = s.0.clone();
-        let mut this_data = HashMap::new();
-        this_data.insert(form_name.clone(), val.to_owned());
+        let mut this_data = IndexMap::new();
+        this_data.insert(form_name.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());
@@ -117,7 +142,7 @@ pub fn TextInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
               // input (ref=input_ref, on:blur=move|_| handle_blur(), bind:value=sample_data, class="form-control", id=form_name, type=form_type, disabled=false, readable=false, required=true)
 
               input( on:blur=move|_| handle_blur(), bind:value=sample_data,
-                     class="form-control", type="text", placeholder=default_value.clone(), required=is_required, pattern="", minlength=min_length, maxlength=max_length, size="",
+                     class="form-control", type="text", placeholder=default_value.clone(), /* required=is_required, pattern="", minlength=min_length, maxlength=max_length, */ size="",
                      readonly=false, disabled=false, autofocus=false, autocomplete=""){}
 
                  div(class=validation_message.get().0){(validation_message.get().1)}

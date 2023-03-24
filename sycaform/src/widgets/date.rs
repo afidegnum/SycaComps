@@ -8,15 +8,9 @@ pub fn DateInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
 
-    let binding = s.1.clone();
+    let binding = s.1;
 
     // let min_length = match min_length {
     //     Some(x) => match x {
@@ -25,50 +19,70 @@ pub fn DateInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     //     },
     //     None => "".to_owned(),
     // };
-    let minimal = binding.get("minimal");
-    let minimal = match minimal {
-        Some(x) => match x {
-            Value::Number(n) => n.as_u64(),
-            _ => Some(0),
-        },
-        None => Some(0),
+    // let minimal = binding.get("minimal");
+    // let minimal = match minimal {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.as_u64(),
+    //         _ => Some(0),
+    //     },
+    //     None => Some(0),
+    // };
+    // let maximal = binding.get("maximal");
+    // let maximal = match maximal {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.as_u64(),
+    //         _ => Some(0),
+    //     },
+    //     None => Some(0),
+    // };
+    // let steps = binding.get("multipleOf");
+    // let steps = match steps {
+    //     Some(x) => match x {
+    //         Value::Number(n) => n.as_u64(),
+    //         _ => Some(0),
+    //     },
+    //     None => Some(0),
+    // };
+    let minimal = match binding.get("minimal") {
+        Some(Value::Number(n)) => n.as_u64(),
+        _ => Some(0),
     };
 
-    let maximal = binding.get("maximal");
-    let maximal = match maximal {
-        Some(x) => match x {
-            Value::Number(n) => n.as_u64(),
-            _ => Some(0),
-        },
-        None => Some(0),
+    let maximal = match binding.get("maximal") {
+        Some(Value::Number(n)) => n.as_u64(),
+        _ => Some(0),
     };
 
-    let steps = binding.get("multipleOf");
-    let steps = match steps {
-        Some(x) => match x {
-            Value::Number(n) => n.as_u64(),
-            _ => Some(0),
-        },
-        None => Some(0),
+    let steps = match binding.get("multipleOf") {
+        Some(Value::Number(n)) => n.as_u64(),
+        _ => Some(0),
     };
 
-    let default_value = binding.get("default");
-    let default_value = match default_value {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+    let default_value = match binding.get("default") {
+        Some(Value::String(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
 
-    let is_required = binding.get("required");
-    let is_required = match is_required {
-        Some(x) => match x {
-            Value::Bool(n) => *n,
-            _ => false,
-        },
-        None => false,
+    let is_required = match binding.get("required") {
+        Some(Value::Bool(n)) => *n,
+        _ => false,
     };
+    // let default_value = binding.get("default");
+    // let default_value = match default_value {
+    //     Some(x) => match x {
+    //         Value::String(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+    // let is_required = binding.get("required");
+    // let is_required = match is_required {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => *n,
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
 
     let validation_message = create_signal(cx, ("", ""));
     // validation lists
@@ -105,7 +119,7 @@ pub fn DateInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
         // let f_name: String = s.0.clone();
         let mut this_data = HashMap::new();
-        this_data.insert(form_name.clone(), val.to_owned());
+        this_data.insert(form_name.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());

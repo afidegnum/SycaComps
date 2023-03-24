@@ -8,24 +8,24 @@ pub fn TelelphoneInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
 
-    let binding = s.1.clone();
+    let binding = s.1;
+
+    // let default_value = binding.get("default");
+    // let default_value = match default_value {
+    //     Some(x) => match x {
+    //         Value::String(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
+
     let default_value = binding.get("default");
     let default_value = match default_value {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+        Some(Value::String(n)) => n.to_string(),
+        _ => "".to_owned(),
     };
-
     let validation_message = create_signal(cx, ("valid-feedback", "looks good"));
     // validation lists
     // let vm = validation_message.clone();
@@ -37,13 +37,17 @@ pub fn TelelphoneInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
     let data_context = use_context::<FormData>(cx);
 
-    let is_required = binding.get("required");
-    let is_required = match is_required {
-        Some(x) => match x {
-            Value::Bool(n) => *n,
-            _ => false,
-        },
-        None => false,
+    // let is_required = binding.get("required");
+    // let is_required = match is_required {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => *n,
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
+    let is_required = match binding.get("required") {
+        Some(Value::Bool(n)) => *n,
+        _ => false,
     };
 
     let handle_blur = move || {
@@ -53,7 +57,7 @@ pub fn TelelphoneInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
         // let f_name: String = s.0.clone();
         let mut this_data = HashMap::new();
-        this_data.insert(form_name.clone(), val.to_owned());
+        this_data.insert(form_name.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());

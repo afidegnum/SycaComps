@@ -169,9 +169,54 @@ html(lang='en')
 
         section.py-5
            .container.px-4.px-lg-5.my-5
-               h1.display-3.text-center.py-5 Numbers Form
+               h1.display-3.text-center.py-5 Dynamic Forms
                .row.gx-2.gx-lg-2.align-items-center
-                   .col-md-9
+                   .col-md-4
+                    .card.border-info
+                      .card-header Data
+                      .card-body
+                        h5.card-title Json Form Data
+                        pre.card-text
+                          |{
+                          |   "title": "A registration form",
+                          |   "description": "A simple form example.",
+                          |   "type": "object",
+                          |   "required": [
+                          |     "firstName",
+                          |     "lastName"
+                          |   ],
+                          |   "properties": {
+                          |     "firstName": {
+                          |       "type": "string",
+                          |       "title": "First name",
+                          |       "default": "Chuck"
+                          |     },
+                          |     "lastName": {
+                          |       "type": "string",
+                          |       "title": "Last name"
+                          |     },
+                          |     "age": {
+                          |       "type": "integer",
+                          |       "title": "Age"
+                          |     },
+                          |     "bio": {
+                          |       "type": "string",
+                          |       "title": "Bio"
+                          |     },
+                          |     "password": {
+                          |       "type": "string",
+                          |       "title": "Password",
+                          |       "minLength": 3
+                          |     },
+                          |     "telephone": {
+                          |       "type": "string",
+                          |       "title": "Telephone",
+                          |       "minLength": 10
+                          |     }
+                          |   }
+                          | }
+
+                   .col-md-5
                        .card-group
                            .card
                                .card-body
@@ -181,26 +226,13 @@ html(lang='en')
                                         label.form-label(for='fname') Integer
                                         input#fname.form-control(type='number', aria-describedby='emailHelp')
 
-                                      .mb-3
-                                        label.form-label(for='fname') Float
-                                        input#fname.form-control(type='number', step=0.01, aria-describedby='emailHelp')
-                                      .mb-3
-                                        label.form-label(for='customRange1') Number range
-                                        input#customRange1.form-range(type='range')
-                                      .mb-3
-                                        label.form-label(for='customRange3') Number range with steps
-                                        input#customRange3.form-range(type='range', min='0', max='10', step='2')
-                                      .mb-3
-                                        label.form-label(for='lname') List Group
-                                        input#lname.form-control(type='text')
-
-                               button.btn.btn-primary(type='submit') Submit
+                                   button.btn.btn-primary(type='submit') Submit
                    .col-md-3
                      .card.border-info
                        .card-header Output
                        .card-body
                          h5.card-title Info card title
-                         p.card-text
+                         code.card-text
                            | Some quick example text to build on the card title and make up the bulk of the card&apos;s content.
 
 

@@ -9,25 +9,22 @@ pub fn ColorInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
 
-    let binding = s.1.clone();
+    let binding = s.1;
 
-    let is_required = binding.get("required");
-    let is_required = match is_required {
-        Some(x) => match x {
-            Value::Bool(n) => *n,
-            _ => false,
-        },
-        None => false,
+    // let is_required = binding.get("required");
+    // let is_required = match is_required {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => *n,
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
+    let is_required = match binding.get("required") {
+        Some(Value::Bool(n)) => *n,
+        _ => false,
     };
-
     let validation_message = create_signal(cx, ("valid-feedback", ""));
     // validation lists
     // let vm = validation_message.clone();
@@ -46,7 +43,7 @@ pub fn ColorInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
         // let f_name: String = s.0.clone();
         let mut this_data = HashMap::new();
-        this_data.insert(form_name.clone(), val.to_owned());
+        this_data.insert(form_name.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());

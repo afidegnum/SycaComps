@@ -8,41 +8,52 @@ pub fn FileInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
-    let binding = s.1.clone();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
+    let binding = s.1;
 
-    let default_value = binding.get("default");
-    let default_value = match default_value {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
-    };
+    // let default_value = binding.get("default");
+    // let default_value = match default_value {
+    //     Some(x) => match x {
+    //         Value::String(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
 
-    let accept_filetype = binding.get("accept");
-    let accept_filetype = match accept_filetype {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
-    };
+    // let accept_filetype = binding.get("accept");
+    // let accept_filetype = match accept_filetype {
+    //     Some(x) => match x {
+    //         Value::String(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
 
-    let is_multiple = binding.get("multiple");
-    let is_multiple = match is_multiple {
-        Some(x) => match x {
-            Value::Bool(n) => *n,
-            _ => false,
-        },
-        None => false,
-    };
+    // let is_multiple = binding.get("multiple");
+    // let is_multiple = match is_multiple {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => *n,
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
+
+    let default_value = binding
+        .get("default")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_owned();
+
+    let accept_filetype = binding
+        .get("accept")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_owned();
+
+    let is_multiple = binding
+        .get("multiple")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
 
     let validation_message = create_signal(cx, ("", ""));
     // validation lists
@@ -57,15 +68,19 @@ pub fn FileInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
     let is_required = binding.get("required");
     let required_mark = create_signal(cx, "");
-    let is_required = match is_required {
-        Some(x) => match x {
-            Value::Bool(n) => {
-                required_mark.set("*");
-                *n
-            }
-            _ => false,
-        },
-        None => false,
+    // let is_required = match is_required {
+    //     Some(x) => match x {
+    //         Value::Bool(n) => {
+    //             required_mark.set("*");
+    //             *n
+    //         }
+    //         _ => false,
+    //     },
+    //     None => false,
+    // };
+    let is_required = match binding.get("required") {
+        Some(Value::Bool(n)) => *n,
+        _ => false,
     };
 
     let handle_blur = move || {
@@ -75,7 +90,7 @@ pub fn FileInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
         // let f_name: String = s.0.clone();
         let mut this_data = HashMap::new();
-        this_data.insert(form_name.clone(), val.to_owned());
+        this_data.insert(form_name.clone(), val);
 
         let mut dt = data_context.data.get().as_ref().clone();
         dt.extend(this_data.clone());

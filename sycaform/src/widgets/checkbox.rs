@@ -9,22 +9,22 @@ pub fn CheckBoxInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let form_name: String = s.0.clone();
     let _form_label: String = s.0.clone();
 
-    let form_title =
-        s.1.clone()
-            .get("title")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_owned();
-    let binding = s.1.clone();
+    let form_title = s.1.get("title").unwrap().as_str().unwrap().to_owned();
+    let binding = s.1;
 
+    // let default_value = binding.get("default");
+    // let default_value = match default_value {
+    //     Some(x) => match x {
+    //         Value::String(n) => n.to_string(),
+    //         _ => "".to_owned(),
+    //     },
+    //     None => "".to_owned(),
+    // };
     let default_value = binding.get("default");
-    let default_value = match default_value {
-        Some(x) => match x {
-            Value::String(n) => n.to_string(),
-            _ => "".to_owned(),
-        },
-        None => "".to_owned(),
+    let default_value = if let Some(Value::String(n)) = default_value {
+        n.to_string()
+    } else {
+        "".to_owned()
     };
 
     // let items_list = binding
@@ -65,7 +65,7 @@ pub fn CheckBoxInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
     let checked_value = create_signal(cx, String::new());
 
     // let checked = create_signal(cx, false);
-    let sample_data = create_signal(cx, default_value.clone());
+    let sample_data = create_signal(cx, default_value);
 
     let data_context = use_context::<FormData>(cx);
 
@@ -147,7 +147,7 @@ pub fn CheckBoxInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
 
                                         // checked_value.set(key.clone());
 
-                                        let new_items = items_signal.get().as_ref().clone().iter().cloned().collect::<Vec<Value>>();
+                                        let new_items = items_signal.get().as_ref().clone().to_vec();
                                         // let mut its = new_items.to_vec();
 
                                         // updated_item(&mut its, &key);
@@ -179,11 +179,11 @@ pub fn CheckBoxInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
                                                 .collect::<Vec<Value>>();
 
                                         // let val: Value = serde_json::from_str(&format!("\"{}\"", checked_value.get().as_ref().clone())).unwrap();
-                                        let val: Value = json!(selected_items.clone());
+                                        let val: Value = json!(selected_items);
 
                                         // let f_name: String = s.0.clone();
                                         let mut this_data = HashMap::new();
-                                        this_data.insert(fname, val.to_owned());
+                                        this_data.insert(fname, val);
 
                                         let mut dt = data_context.data.get().as_ref().clone();
                                         dt.extend(this_data.clone());
@@ -194,7 +194,7 @@ pub fn CheckBoxInput<G: Html>(cx: Scope, s: (String, Value)) -> View<G> {
                                 // input (class="form-check-input", type="radio", name="inlineRadioOptions", id="inlineRadio1", value="option1") {"---"}
                                 // li (class="list-group-item") { input (class="form-check-input me-1", type="radio") {} (y)}
                                  div(class="form-check"){
-                                 input (on:click=checked_set, checked=check_it.clone(), class="form-check-input", id=kx.clone(), name=fnx.clone(), type="checkbox") {}
+                                 input (on:click=checked_set, checked=check_it, class="form-check-input", id=kx.clone(), name=fnx.clone(), type="checkbox") {}
                                  label (class="form-check-label", for= x.get("key").unwrap().as_str().unwrap().to_owned()) {(value)}
                                  }
                            }
